@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Training U(1) lattice gauge theory.
-
+"""
+Training U(1) lattice gauge theory.
 This script trains U1 pure gauge model.
 After training, it generates samples and computes the free energy
 and compares it to the exact value.
@@ -9,12 +9,9 @@ and compares it to the exact value.
 
 import time
 from pathlib import Path
-
-
 from neumc.utils.utils import dkl, ess
 from numpy import log
 import torch
-
 import neumc
 import neumc.utils.metrics as metrics
 import neumc.utils.stats_utils as stats_utils
@@ -22,33 +19,34 @@ import neumc.utils.stats_utils as stats_utils
 
 print(f"Running on PyTorch {torch.__version__}")
 
+# Checking for GPU:
 if torch.cuda.is_available():
     torch_device = "cuda"
     print(f"Running on {torch.cuda.get_device_name()}")
 else:
     torch_device = "cpu"
 
+# Var for output directory:
 OUTPUT_DIR = "out_u1"
 output_dir_path = Path(OUTPUT_DIR)
 output_dir_path.mkdir(parents=True, exist_ok=True)
 
-n_eras = 2
-n_epochs_per_era = 100
-print_freq = 25  # epochs
-
 # Physical model parameters
 L = 8
 lattice_shape = (L, L)
-beta = 1.0
+beta = 1.0 
 
-# Training parameters
-
-loss = "path_gradient"
-lr = 0.001
+# Training parameters:
+# To avoid memory overflow, samples are divided into batches of size batch_size;
+n_eras = 2
+n_epochs_per_era = 100
+print_freq = 25  # epochs
+loss = "path_gradient"  # "reparam", "reinforce" or "path_gradient" (one of the most important parameters);
+lr = 0.001  # learning rate;
 batch_size = 2**10
 n_batches = 1
 
-# Final sampling parameters.
+# Final sampling parameters (from final model);
 n_samples = 2**17
 sampling_batch_size = 2**10
 n_boot_samples = 100
@@ -58,10 +56,14 @@ float_dtype = torch.float32
 
 config = {
     "layers": {
-        "n_layers": 16,
+        "n_layers": 16,  # number of coupling layers;
         "masking": "u1",
         "coupling": "cs",
-        "nn": {"hidden_channels": [32, 32], "kernel_size": 3, "dilation": 1},
+        "nn": {
+            "hidden_channels": [32, 32],
+            "kernel_size": 3,
+            "dilation": 1,
+        },  # hidden_channels: list of convolutional layers, dilation: spacing between kernel points (dil = 1 is standard conv);
         "n_knots": 9,
         "float_dtype": "float32",
         "lattice_shape": [L, L],
@@ -122,8 +124,10 @@ layers = neumc.nf.u1_equiv.make_u1_equiv_layers(
 
 model = {"layers": layers, "prior": prior}
 
-grad_estimator_name="RT"
-grad_estimator = getattr(neumc.training.gradient_estimator, f"{grad_estimator_name}Estimator")(prior, layers, action)
+grad_estimator_name = "RT"
+grad_estimator = getattr(
+    neumc.training.gradient_estimator, f"{grad_estimator_name}Estimator"
+)(prior, layers, action)
 
 history = {"dkl": [], "std_dkl": [], "loss": [], "ess": []}
 
@@ -157,7 +161,7 @@ for era in range(n_eras):
                 scheduler=None,
                 era=era,
                 configuration=config,
-                path=f"{OUTPUT_DIR}/u1_{grad_estimator_name}_{L:02d}x{L:02d}.zip"
+                path=f"{OUTPUT_DIR}/u1_{grad_estimator_name}_{L:02d}x{L:02d}.zip",
             )
             elapsed_time = time.time() - start_time
             avg = metrics.average_metrics(history, n_epochs_per_era, history.keys())

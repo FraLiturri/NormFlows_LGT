@@ -29,7 +29,7 @@ if scipy_installed:
 
     def logZ(L, beta, *, n=2):
         z = L * L * np.log(iv(0, beta))
-        x = np.sum(2 * np.power(iv(np.arange(1, n + 1), beta) / iv(0, beta), L * L))
+        x = np.sum(2 * np.power(iv(np.arange(1, n + 1), beta) / iv(0, beta), L * L)) #iv(k, beta) is the modified Bessel function of k order; 
         return z + x - x * x / 2
 
 
