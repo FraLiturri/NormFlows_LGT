@@ -29,7 +29,9 @@ if scipy_installed:
 
     def logZ(L, beta, *, n=2):
         z = L * L * np.log(iv(0, beta))
-        x = np.sum(2 * np.power(iv(np.arange(1, n + 1), beta) / iv(0, beta), L * L)) #iv(k, beta) is the modified Bessel function of k order; 
+        x = np.sum(
+            2 * np.power(iv(np.arange(1, n + 1), beta) / iv(0, beta), L * L)
+        )  # iv(k, beta) is the modified Bessel function of k order;
         return z + x - x * x / 2
 
 
@@ -67,7 +69,7 @@ def compute_u1_2x1_loops(links):
     return torch.stack((u1_2x1_loops(links, 0, 1), u1_2x1_loops(links, 1, 0)), 1)
 
 
-class U1GaugeAction:
+class U1GaugeAction:  # simply the U(1) action;
     def __init__(self, beta):
         self.beta = beta
 

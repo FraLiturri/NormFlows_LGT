@@ -8,18 +8,18 @@ and compares it to the exact value.
 """
 
 import time
-from pathlib import Path
-from neumc.utils.utils import dkl, ess
-from numpy import log
 import torch
 import neumc
 import neumc.utils.metrics as metrics
 import neumc.utils.stats_utils as stats_utils
 
+from pathlib import Path
+from neumc.utils.utils import dkl, ess
+from numpy import log
 
 print(f"Running on PyTorch {torch.__version__}")
 
-# Checking for GPU:
+# Checking for GPU, else CPU is used:
 if torch.cuda.is_available():
     torch_device = "cuda"
     print(f"Running on {torch.cuda.get_device_name()}")
@@ -34,48 +34,49 @@ output_dir_path.mkdir(parents=True, exist_ok=True)
 # Physical model parameters
 L = 8
 lattice_shape = (L, L)
-beta = 1.0 
+beta = 5.0
 
 # Training parameters:
 # To avoid memory overflow, samples are divided into batches of size batch_size;
 n_eras = 2
 n_epochs_per_era = 100
 print_freq = 25  # epochs
-loss = "path_gradient"  # "reparam", "reinforce" or "path_gradient" (one of the most important parameters);
-lr = 0.001  # learning rate;
+loss = "path_gradient"
+lr = 0.01  # learning rate;
 batch_size = 2**10
 n_batches = 1
 
 # Final sampling parameters (from final model);
-n_samples = 2**17
+n_samples = 2**10
 sampling_batch_size = 2**10
-n_boot_samples = 100
-boot_bin_size = 1
+n_boot_samples = 100  # number of samples for bootstrap;
+boot_bin_size = 1  # bin size for bootstrap;
+float_dtype = (
+    torch.float32
+)  # decimal precision: float32 -> 7 digits, float64 -> 15-17 digits;
 
-float_dtype = torch.float32
-
+# CNN and coupling layers configuration; see neumc.nf.nn.make_conv_net for details.
 config = {
     "layers": {
-        "n_layers": 16,  # number of coupling layers;
+        "n_layers": 16,  # number of coupling layers = #number of masks;
         "masking": "u1",
         "coupling": "cs",
         "nn": {
-            "hidden_channels": [32, 32],
+            "hidden_channels": [32, 32],  # number of channels in hidden conv layers;
             "kernel_size": 3,
-            "dilation": 1,
-        },  # hidden_channels: list of convolutional layers, dilation: spacing between kernel points (dil = 1 is standard conv);
-        "n_knots": 9,
+            "dilation": 1,  # can be a list;
+        },  # hidden_channels: list of convolutional layers; dilation: spacing between kernel rows/cols (dil = 1 is standard conv).
+        "n_knots": 18,  # number of knots in the circular spline;
         "float_dtype": "float32",
         "lattice_shape": [L, L],
     }
 }
 
-layers_cfg = config["layers"]
-nn_cfg = layers_cfg["nn"]
+layers_cfg = config["layers"]  # from dictionary config get layers config;
+nn_cfg = layers_cfg["nn"]  # from layers config get nn config;
 
+# Action and masking;
 action = neumc.physics.u1.U1GaugeAction(beta)
-
-
 masks = neumc.nf.gauge_masks.u1_masks_gen(
     lattice_shape=lattice_shape, float_dtype=float_dtype, device=torch_device
 )
@@ -87,7 +88,7 @@ masks = neumc.nf.gauge_masks.u1_masks_gen(
 #     device=torch_device,
 # )
 
-in_channels = 2
+in_channels = 2  # input channels for the input to the coupling NN;
 n_knots = layers_cfg["n_knots"]
 
 # Prior
@@ -100,21 +101,23 @@ prior = neumc.nf.prior.MultivariateUniform(
 
 # Coupling layers
 def make_plaq_coupling(mask):
-    out_channels = 3 * (n_knots - 1) + 1
+    out_channels = 3 * (n_knots - 1) + 1  # output channels for the coupling NN output;
     net = neumc.nf.nn.make_conv_net(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        hidden_channels=nn_cfg["hidden_channels"],
+        in_channels=in_channels,  # number of internal features of input (ie RGB for colored images);
+        out_channels=out_channels,  # number of internal features of output;
+        hidden_channels=nn_cfg[
+            "hidden_channels"
+        ],  # number of internal features of hidden layers;
         kernel_size=nn_cfg["kernel_size"],
-        use_final_tanh=False,
-        dilation=nn_cfg["dilation"],
+        use_final_tanh=False, #whether to use tanh at the end of the network: can be useful to bound the output;
+        dilation=nn_cfg["dilation"], #dilation for kenrels: can be a list;
     )
     net.to(torch_device)
 
     return neumc.nf.cs_coupling.CSCoupling(net, mask, n_knots)
 
 
-layers = neumc.nf.u1_equiv.make_u1_equiv_layers(
+layers = neumc.nf.u1_equiv.make_u1_equiv_layers( #loops_function can be used to add additional loops beyond plaquettes;
     loops_function=None,  # lambda x: [neumc.physics.u1.compute_u1_2x1_loops(x)],
     make_plaq_coupling=make_plaq_coupling,
     masks=masks,
@@ -124,7 +127,8 @@ layers = neumc.nf.u1_equiv.make_u1_equiv_layers(
 
 model = {"layers": layers, "prior": prior}
 
-grad_estimator_name = "RT"
+# Gradient estimator;
+grad_estimator_name = "REINFORCE"  # "PathGradient", "REINFORCE" or "RT" (path gradient);
 grad_estimator = getattr(
     neumc.training.gradient_estimator, f"{grad_estimator_name}Estimator"
 )(prior, layers, action)
@@ -138,7 +142,9 @@ start_time = time.time()
 
 total_epochs = n_eras * n_epochs_per_era
 epochs_done = 0
+
 print(f"Starting training: {n_eras} x {n_epochs_per_era} epochs")
+
 for era in range(n_eras):
     for epoch in range(n_epochs_per_era):
         optimizer.zero_grad()
@@ -154,7 +160,9 @@ for era in range(n_eras):
             },
         )
         epochs_done += 1
-        if (epoch + 1) % print_freq == 0:
+        if (
+            epoch + 1
+        ) % print_freq == 0:  # in this way doesn't plot at the end, has to be fixed;
             neumc.utils.checkpoint.safe_save_checkpoint(
                 model=layers,
                 optimizer=optimizer,
@@ -182,7 +190,6 @@ for era in range(n_eras):
 print(f"{elapsed_time / n_eras:.2f}s/era")
 
 # Sampling and free energy estimation
-
 if n_samples > 0:
     print(f"Sampling {n_samples} configurations")
     if neumc.physics.u1.scipy_installed:

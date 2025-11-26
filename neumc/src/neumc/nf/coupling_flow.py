@@ -10,7 +10,6 @@ from typing import Callable
 
 import torch
 from typing_extensions import override
-
 from neumc.nf.flow_abc import Transformation
 
 
