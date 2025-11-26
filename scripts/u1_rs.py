@@ -33,7 +33,7 @@ batch_size = 1024
 L = 8 
 lattice_shape = (L, L)
 link_shape = (2, L, L)
-beta = 1
+beta = int(sys.argv[1])
 u1_action = u1.U1GaugeAction(beta)
 F_exact = -u1.logZ(L, beta=beta) - 2 * L * L * np.log(2 * np.pi)
 
@@ -46,10 +46,10 @@ n_layers = 16
 n_knots = 9
 
 #Training parameters; 
-N_era = 1
-N_epoch = 1
-base_lr = .001
-lambda_l2 = 1e-4
+N_era = 10
+N_epoch = int(sys.argv[2])
+base_lr = float(sys.argv[3])
+lambda_l2 = float(sys.argv[4])
 print_freq = N_era*N_epoch # epochs
 plot_freq = 1 # epochs
 
