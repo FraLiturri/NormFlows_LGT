@@ -149,6 +149,7 @@ lqs = np.linspace(lq_2x1.min(), lq_2x1.max(), 100);
 ax.scatter(lq_2x1, lp_2x1, s=5, alpha=0.25);
 ax.plot(lqs, lqs * fit_2x1.slope + fit_2x1.intercept, color='red', zorder=10);
 ax.text(0.15, .85, f"$\\log P = {fit_2x1.slope:.3}\\log q+{fit_2x1.intercept:.3f}$", transform=ax.transAxes);
+ax.savefig(f'u1_rs_logp_logq_beta{beta}_L{L}.png', bbox_inches='tight')
 
 lw_2x1 = lp_2x1-lq_2x1
 F_q_2x1, F_q_std_2x1 = torch_bootstrap(-lw_2x1, n_samples=100, binsize=1)
@@ -162,7 +163,9 @@ u_p, s_p, s_q, accepted = metropolize(u_2x1, lq_2x1, lp_2x1)
 Q = grab(u1.topo_charge(u_p))
 plt.figure(figsize=(5, 3.5), dpi=125)
 plt.plot(Q)
+
 plt.title(r"$\beta = $"+ f"{beta}")
 plt.xlabel(r'$t_{MC}$')
 plt.ylabel(r'topological charge $Q$')
-plt.show()
+plt.savefig(f'u1_rs_Q_beta{beta}_L{L}.png', bbox_inches='tight')
+
