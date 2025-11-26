@@ -168,4 +168,4 @@ plt.title(r"$\beta = $"+ f"{beta}")
 plt.xlabel(r'$t_{MC}$')
 plt.ylabel(r'topological charge $Q$')
 plt.savefig(f'u1_rs_Q_beta{beta}_L{L}.png', bbox_inches='tight')
-
+plt.show()
