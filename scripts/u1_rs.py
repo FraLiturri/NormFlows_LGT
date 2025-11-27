@@ -115,9 +115,11 @@ for era in range(N_era):
     for epoch in range(N_epoch):
         optimizer.zero_grad()
         loss, log_q, log_p = train_step3.step(batch_size=batch_size)
+        torch.nn.utils.clip_grad_norm_(model['layers'].parameters(), max_norm=1.0)  # Gradient clipping
         optimizer.step()
 
         clip_weights(layers, min_val=-1, max_val=1)
+
         um.add_metrics(history, {
                 "loss": loss.cpu().numpy().item(),
                 "ess": neumc.utils.ess(log_p, log_q).cpu().numpy().item(),
