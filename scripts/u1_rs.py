@@ -86,12 +86,16 @@ history = {
     'ess' : []
 }
 
+def clip_weights(model_layers, min_val=-1, max_val=1): # Clipping function;
+    for param in model_layers.parameters():
+        param.data.clamp_(min_val, max_val)
+
 
 MODEL_WEIGHTS_PATH = "weights.pt"
 # Check if weights file exists and load them
 if os.path.exists(MODEL_WEIGHTS_PATH):
     print(f"Loading existing weights from {MODEL_WEIGHTS_PATH}")
-    state_dict = torch.load(MODEL_WEIGHTS_PATH)
+    state_dict = torch.load(MODEL_WEIGHTS_PATH, weights_only= True)
     model['layers'].load_state_dict(state_dict)
     print("Weights loaded successfully!")
 else:
@@ -113,6 +117,7 @@ for era in range(N_era):
         loss, log_q, log_p = train_step3.step(batch_size=batch_size)
         optimizer.step()
 
+        clip_weights(layers, min_val=-1, max_val=1)
         um.add_metrics(history, {
                 "loss": loss.cpu().numpy().item(),
                 "ess": neumc.utils.ess(log_p, log_q).cpu().numpy().item(),
