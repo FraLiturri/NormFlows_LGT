@@ -38,7 +38,7 @@ u1_action = u1.U1GaugeAction(beta)
 F_exact = -u1.logZ(L, beta=beta) - 2 * L * L * np.log(2 * np.pi)
 
 #Model parameters; 
-hidden_channels = [8,8]
+hidden_channels = [16, 16]
 kernel_size = 3
 in_channels = 6
 dilation = 1
