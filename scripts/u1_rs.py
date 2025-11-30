@@ -46,7 +46,7 @@ n_layers = 16
 n_knots = 9
 
 #Training parameters; 
-N_era = 10
+N_era = 50
 N_epoch = int(sys.argv[2])
 base_lr = float(sys.argv[3])
 lambda_l2 = float(sys.argv[4])
