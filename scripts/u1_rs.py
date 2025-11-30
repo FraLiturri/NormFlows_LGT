@@ -130,7 +130,7 @@ for era in range(N_era):
         if epoch % print_freq == 0:
             avg = um.average_metrics(history, N_epoch, history.keys())
             ellapsed_time = time.time()-start_time
-            print(f"Era {era:3d} epoch {epoch:4d} ellapsed time {ellapsed_time:.1f}")
+            print(f" > Era {era:3d} epoch {epoch:4d} ellapsed time {ellapsed_time:.1f}")
             um.print_dict(avg)
 
 
@@ -160,13 +160,16 @@ plt.savefig(f'u1_rs_lr.png', bbox_inches='tight')
 
 lw_2x1 = lp_2x1-lq_2x1
 F_q_2x1, F_q_std_2x1 = torch_bootstrap(-lw_2x1, n_samples=100, binsize=1)
-print(f"F_q = {F_q_2x1:.4f}+/-{F_q_std_2x1:.4f}  F_q-F_exact = {F_q_2x1 - F_exact:.5f}")
 F_nis_2x1, F_nis_std_2x1 = torch_bootstrapf(
   lambda x: -(torch.special.logsumexp(x, 0) - np.log(len(x))),
                                     lw_2x1, n_samples=100, binsize=1)
-print(f"F_NIS = {F_nis_2x1:.3f}+/-{F_nis_std_2x1:.4f} F_NIS-F_exact = {F_nis_2x1-F_exact:.4f}")
 
 u_p, s_p, s_q, accepted = metropolize(u_2x1, lq_2x1, lp_2x1)
+
+print("Accept rate is:", float(accepted.count_nonzero())/len(accepted)*100,"%")
+print(f"F_q = {F_q_2x1:.4f}+/-{F_q_std_2x1:.4f}  F_q-F_exact = {F_q_2x1 - F_exact:.5f}")
+print(f"F_NIS = {F_nis_2x1:.3f}+/-{F_nis_std_2x1:.4f} F_NIS-F_exact = {F_nis_2x1-F_exact:.4f}")
+
 Q = grab(u1.topo_charge(u_p))
 plt.figure(figsize=(5, 3.5), dpi=125)
 plt.plot(Q)
