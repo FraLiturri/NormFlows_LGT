@@ -26,29 +26,29 @@ def metropolize(samples_q, log_q, log_p):
     accepted
         array of 0s and 1s indicating whether the sample was accepted
     """
-    samples_p = samples_q.clone()
+    samples_p = samples_q.clone() #in Pytorch .clone() creates a independent copy of the tensor; 
     samples_p_log_q = log_q.clone()
     samples_p_log_p = log_p.clone()
 
-    r = torch.rand(len(samples_p), device=samples_q.device)
+    r = torch.rand(len(samples_p), device=samples_q.device) #uniform random numbers between 0 and 1;
+    log_w = log_p - log_q 
+    prev_log_w = log_w[0] #initial log weight;
+    accepted = torch.zeros(len(samples_p)) #creates a tensor of zeros;
 
-    log_w = log_p - log_q
-    prev_log_w = log_w[0]
-    accepted = torch.zeros(len(samples_p))
     for i in range(1, len(samples_p)):
-        log_quot = log_w[i] - prev_log_w
-        if r[i] < torch.exp(log_quot):
+        log_quot = log_w[i] - prev_log_w #metropolis ratio in log space; 
+        if r[i] < torch.exp(log_quot): #we are sampling with w(\phi_i); 
             prev_log_w = log_w[i]
             accepted[i] = 1
         else:
             samples_p[i] = samples_p[i - 1]
-            samples_p_log_q = log_q[i - 1]
-            samples_p_log_p = log_p[i - 1]
+            samples_p_log_q = log_q[i - 1] #! should be samples_p_log_q[i] ?
+            samples_p_log_p = log_p[i - 1] #! should be samples_p_log_p[i] ?
 
     return samples_p, samples_p_log_q, samples_p_log_p, accepted
 
 
-def metropolize_numpy(samples_q, log_q, log_p):
+def metropolize_numpy(samples_q, log_q, log_p): #same as before, but with numpy arrays;
     samples_p = samples_q.copy()
     r = np.random.rand(len(samples_p))
 

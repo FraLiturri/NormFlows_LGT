@@ -9,16 +9,23 @@ except ImportError as e:
     print(f"scipy is not installed: {e}")
 
 
-M_2PI = 2 * torch.pi
+M_2PI = 2 * torch.pi  # defines a reusable constant (=2pi);
 
 
 def torch_mod(x):
+    """
+    - torch.remainder calculates the remainder of division element-wise;
+    - torch.where(condition, x, y) return a tensor of elements in x for which condition is True, and elements in y elsewhere;
+      in this way the elements of the new tensor are all lesser than 2pi.
+    """
     x = torch.remainder(x, M_2PI)
-    x = torch.where(x >= M_2PI, x - M_2PI, x)
+    x = torch.where(
+        x >= M_2PI, x - M_2PI, x
+    )  # safety check to ensure x < 2pi (floating point issues can erase equality);
     return x
 
 
-def torch_wrap(x):
+def torch_wrap(x):  # transforms angles to the interval [-pi, pi);
     return torch_mod(x + np.pi) - np.pi
 
 
@@ -26,7 +33,6 @@ debug_info = {}
 
 
 if scipy_installed:
-
     def logZ(L, beta, *, n=2):
         z = L * L * np.log(iv(0, beta))
         x = np.sum(

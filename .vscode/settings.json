@@ -1,5 +1,8 @@
 {
     "python.analysis.extraPaths": [
         "./notebooks"
-    ]
+    ],
+    "foam.files.defaultNoteExtension": "ipynb",
+    "foam.files.newNotePath": "currentDir",
+    "foam.files.notesExtensions": "ipynb"
 }

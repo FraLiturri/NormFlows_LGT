@@ -38,15 +38,15 @@ u1_action = u1.U1GaugeAction(beta)
 F_exact = -u1.logZ(L, beta=beta) - 2 * L * L * np.log(2 * np.pi)
 
 #Model parameters; 
-hidden_channels = [16, 16]
+hidden_channels = [64, 64]
 kernel_size = 3
 in_channels = 6
 dilation = 1
-n_layers = 16
+n_layers = 48
 n_knots = 9
 
 #Training parameters; 
-N_era = 50
+N_era = 100
 N_epoch = int(sys.argv[2])
 base_lr = float(sys.argv[3])
 lambda_l2 = float(sys.argv[4])
