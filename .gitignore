@@ -28,3 +28,4 @@ notebooks/phi4/*.png
 notebooks/phi4/volume_hist.png
 
 _notes/
+tests.py

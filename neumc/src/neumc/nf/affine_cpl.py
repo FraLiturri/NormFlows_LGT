@@ -9,17 +9,25 @@ from neumc.nf.coupling_flow import CouplingLayer
 
 class AffineTransform:
     def __init__(self):
-        super().__init__()
+        super().__init__()  # this calls the __init__ method of the Object class. Can be useful in future if we inherit from another class;
 
     @staticmethod
     def forward(
         x, *, active_mask: torch.Tensor, parameters: tuple[torch.Tensor, torch.Tensor]
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        s, t = parameters
+    ) -> tuple[
+        torch.Tensor, torch.Tensor
+    ]:  # the asterisk (*) indicates that all the following parameters must be specified as keyword arguments,
+        s, t = (
+            parameters  # this is done for clarity and to avoid mistakes when passing arguments. This will return a tuple of two tensors;
+        )
 
-        fx = t + x * torch.exp(s)
-        axes = range(1, len(s.size()))
-        logJ = torch.sum(active_mask * s, dim=tuple(axes))
+        fx = t + x * torch.exp(s)  # s and t are matrices;
+        axes = range(
+            1, len(s.size())
+        )  # how many dimensions will have the output tensor;
+        logJ = torch.sum(
+            active_mask * s, dim=tuple(axes)
+        )  # active_mask is a tensor that indicates which elements of the input x are active;
 
         return fx, logJ
 
@@ -57,7 +65,7 @@ class AffineNetConditioner(torch.nn.Module):
             a convolutional neural network
         """
         super().__init__()
-        self.net = net
+        self.net = net  # the parameter net is saved to the instance variable self.net;
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -75,9 +83,12 @@ class AffineNetConditioner(torch.nn.Module):
         tuple[torch.Tensor, torch.Tensor]
             a batch of parameters for the affine transformation
         """
-        out = self.net(x)
-        D = out.shape[1] // 2
-        return out[:, 0:D], out[:, D : 2 * D]
+        out = self.net(x)  # tensor of shape 1xN (vector);
+        D = out.shape[1] // 2  # D = N // 2 ;
+        return (
+            out[:, 0:D],
+            out[:, D : 2 * D],
+        )  # returns the first and second half of the output;
 
 
 class AffineScalarNetConditioner(torch.nn.Module):
@@ -110,22 +121,29 @@ class AffineScalarNetConditioner(torch.nn.Module):
         -------
         tuple[torch.Tensor, torch.Tensor]
             a batch of parameters for the affine transformation
+
+
+        oss: (Batch, channels, height, width) is the expected input shape for a convolutional NN in PyTorch.
         """
-        out = self.net(x.unsqueeze(1))
+        out = self.net(
+            x.unsqueeze(1)
+        )  # this adds a channel dimension to the input tensor x;
         return out[:, 0], out[:, 1]
 
 
-class AffineCoupling(CouplingLayer):
+class AffineCoupling(CouplingLayer):  # subclass of CouplingLayer;
     def __init__(
         self,
         net: torch.nn.Module,
-        mask: Sequence[dict[str, torch.Tensor] | dict[str, torch.Tensor]],
+        mask: Sequence[
+            dict[str, torch.Tensor] | dict[str, torch.Tensor]
+        ],  # a mask is a sequence of dict. with string keys (active, passive, frozen) and tensor values;
     ):
         super().__init__(
             conditioner=AffineScalarNetConditioner(net),
             transform=affine_coupling,
             mask=mask,
-        )
+        )  # intializes the parent class CouplingLayer with the specified conditioner, transform, and mask;
 
 
 def make_scalar_affine_layers(
@@ -156,7 +174,9 @@ def make_scalar_affine_layers(
             bias=bias,
         )
         mask = next(masks)
-        if mask[0]["active"].shape != lattice_shape:
+        if (
+            mask[0]["active"].shape != lattice_shape
+        ):  # to apply the mask to the lattice, their shapes must be the same!;
             raise ValueError(
                 f"Lattice_shape {lattice_shape} != mask.shape {mask[0]['active'].shape}"
             )

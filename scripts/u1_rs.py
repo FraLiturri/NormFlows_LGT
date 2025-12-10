@@ -29,7 +29,7 @@ from  live_plot import  init_live_plot, update_plots
 torch_device = "cuda:0" if torch.cuda.is_available() else "cpu"
 float_type = torch.float32
 
-batch_size = 1024
+batch_size = 12
 L = 8 
 lattice_shape = (L, L)
 link_shape = (2, L, L)
@@ -38,7 +38,7 @@ u1_action = u1.U1GaugeAction(beta)
 F_exact = -u1.logZ(L, beta=beta) - 2 * L * L * np.log(2 * np.pi)
 
 #Model parameters; 
-hidden_channels = [64, 64]
+hidden_channels = [32, 32]
 kernel_size = 3
 in_channels = 6
 dilation = 1
@@ -50,7 +50,7 @@ N_era = 100
 N_epoch = int(sys.argv[2])
 base_lr = float(sys.argv[3])
 lambda_l2 = float(sys.argv[4])
-print_freq = N_era*N_epoch # epochs
+print_freq = 10 # epochs
 plot_freq = 1 # epochs
 
 masks = neumc.nf.gauge_masks.sch_2x1_masks_gen(lattice_shape=(L,L), float_dtype=float_type, device=torch_device)
@@ -172,8 +172,10 @@ print(f"F_NIS = {F_nis_2x1:.3f}+/-{F_nis_std_2x1:.4f} F_NIS-F_exact = {F_nis_2x1
 
 Q = grab(u1.topo_charge(u_p))
 plt.figure(figsize=(5, 3.5), dpi=125)
-plt.plot(Q)
 
+np.savetxt(f'Q{beta}.txt', Q)
+
+plt.plot(Q)
 plt.title(r"$\beta = $"+ f"{beta}")
 plt.xlabel(r'$t_{MC}$')
 plt.ylabel(r'topological charge $Q$')

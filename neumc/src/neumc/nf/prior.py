@@ -1,13 +1,13 @@
 import torch
 
 
-class SimpleNormal:
+class SimpleNormal:  # this class implements a gaussian prior distribution, with diagonal covariance matrix, i.e., independent normal variables;
     """
     Simple normal distribution with diagonal covariance matrix. The output have the same shape as loc.
 
     Parameters
     ----------
-    loc: Tensor 
+    loc: Tensor
         mean of the distribution
     var: Tensor
         variance of the distribution
@@ -18,12 +18,12 @@ class SimpleNormal:
     ):
         self.dist = torch.distributions.normal.Normal(
             torch.flatten(loc.to(device)), torch.flatten(var.to(device))
-        )
-        self.shape = loc.shape
+        )  # passing means and variances to the built-in Normal distribution;
+        self.shape = loc.shape #the shape of the output is equivalent to the shape of the vector loc;
 
-    def log_prob(self, x: torch.Tensor):
-        logp = self.dist.log_prob(x.reshape(x.shape[0], -1))
-        return torch.sum(logp, dim=1)
+    def log_prob(self, x: torch.Tensor): 
+        logp = self.dist.log_prob(x.reshape(x.shape[0], -1)) #log_prob here is a built-in function: returns the log_prob; 
+        return torch.sum(logp, dim=1)                        #x.shape[0] return the first dimension of x;
 
     def sample_n(self, batch_size: int):
         x = self.dist.sample((batch_size,))
@@ -50,3 +50,4 @@ class MultivariateUniform:
 
     def sample_n(self, batch_size: int):
         return self.dist.sample((batch_size,))
+    

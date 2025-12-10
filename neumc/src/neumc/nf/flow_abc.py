@@ -4,13 +4,20 @@ from typing import Iterable
 import torch
 
 
-class Transformation(torch.nn.Module, ABC):
+class Transformation(
+    torch.nn.Module, ABC
+):  # Transformation is a subclass of torch.nn.Module and ABC (Abstract Base Class);
     def __init__(self):
         super().__init__()
 
     @abstractmethod
     @override
-    def forward(self, z) -> tuple[torch.Tensor, torch.Tensor]:
+    def forward(
+        self, z
+    ) -> tuple[
+        torch.Tensor, torch.Tensor
+    ]:  # this method will transform the prior sample z into the target space x,
+        # returning also the log-Jacobian determinant;
         """
         Transforms a batch of input configurations.
 
@@ -26,11 +33,14 @@ class Transformation(torch.nn.Module, ABC):
         log_J: torch.Tensor
             the log of the Jacobian determinant of the transformation
         """
-        ...
+        ...  # equivalent to "pass";
 
-    def reverse(self, x) -> tuple[torch.Tensor, torch.Tensor]:
+    def reverse(
+        self, x
+    ) -> tuple[
+        torch.Tensor, torch.Tensor
+    ]:  # this method will transform the target sample x back to the prior space z;
         """
-
         Parameters
         ----------
         x
@@ -42,7 +52,7 @@ class Transformation(torch.nn.Module, ABC):
         loog_J: torch.Tensor
             the log of the Jacobian determinant of the transformation
         """
-        return NotImplemented
+        return NotImplemented #if not overridden, returns NotImplemented;
 
     def sample(self, prior, batch_size: int):
         z = prior.sample_n(batch_size)
@@ -51,18 +61,18 @@ class Transformation(torch.nn.Module, ABC):
         return x, log_prob_z - log_J
 
 
-class TransformationSequence(Transformation):
+class TransformationSequence(Transformation): #this class implements a sequence of transformations of type Transformation;
     def __init__(self, layers: Iterable[Transformation]):
         super().__init__()
         self.layers = torch.nn.ModuleList(layers)
 
     @override
     def forward(self, z) -> tuple[torch.Tensor, torch.Tensor]:
-        log_J = torch.zeros(z.shape[0], device=z.device)
+        log_J = torch.zeros(z.shape[0], device=z.device) #z.device accesses the device where z is stored; 
 
         for layer in self.layers:
             z, log_J_layer = layer.forward(z)
-            log_J += log_J_layer
+            log_J += log_J_layer #log(a*b) = log(a) + log(b);
 
         return z, log_J
 

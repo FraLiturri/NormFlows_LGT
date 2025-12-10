@@ -18,12 +18,12 @@ class CouplingLayer(Transformation):
         self,
         transform,
         conditioner: Callable,
-        mask: Sequence[dict[str, torch.Tensor]] | dict[str, torch.Tensor],
+        mask: Sequence[dict[str, torch.Tensor]] | dict[str, torch.Tensor], #mask is either a sequence of dicts or a single dict (| means "or" in type hints);
     ):
-        super().__init__()
+        super().__init__() 
         self.transform = transform
         if not isinstance(mask, Sequence):
-            self.mask = (mask,)
+            self.mask = (mask,) #if mask is not a sequence, convert it to a single-element sequence;
         else:
             self.mask = mask
         self.conditioner = conditioner
@@ -32,16 +32,16 @@ class CouplingLayer(Transformation):
         self, dir: int, xs: Sequence[torch.Tensor] | torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
         if not isinstance(xs, Sequence):
-            xs = (xs,)
+            xs = (xs,) #in case xs is a single tensor, convert it to a single-element sequence;
 
-        # x_active = xs[0] * self.mask[0]["active"]
+        # x_active = xs[0] * self.mask[0]["active"] #xs[0] is the batch of input configurations;
         x_passive = xs[0] * self.mask[0]["passive"]
 
         x_frozen = [
             mask["frozen"] * item_x for mask, item_x in zip(self.mask, xs, strict=True)
         ]
 
-        parameters_ = self.conditioner(*x_frozen)
+        parameters_ = self.conditioner(*x_frozen) #here x_frozen is unpakced (see usage of *args); 
         if dir == 0:
             z_active, log_J = self.transform(
                 xs[0], active_mask=self.mask[0]["active"], parameters=parameters_

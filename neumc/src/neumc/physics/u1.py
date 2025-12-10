@@ -12,7 +12,7 @@ except ImportError as e:
 M_2PI = 2 * torch.pi  # defines a reusable constant (=2pi);
 
 
-def torch_mod(x):
+def torch_mod(x):  # assures that all the elements in x are in (0, 2pi);
     """
     - torch.remainder calculates the remainder of division element-wise;
     - torch.where(condition, x, y) return a tensor of elements in x for which condition is True, and elements in y elsewhere;
@@ -33,6 +33,7 @@ debug_info = {}
 
 
 if scipy_installed:
+
     def logZ(L, beta, *, n=2):
         z = L * L * np.log(iv(0, beta))
         x = np.sum(
@@ -43,7 +44,9 @@ if scipy_installed:
 
 def set_weights(m):
     if hasattr(m, "weight") and m.weight is not None:
-        torch.nn.init.normal_(m.weight, mean=1, std=2)
+        torch.nn.init.normal_(
+            m.weight, mean=1, std=2
+        )  # weights are guassian distributed...!;
     if hasattr(m, "bias") and m.bias is not None:
         m.bias.data.fill_(-1)
 
