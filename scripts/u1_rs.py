@@ -29,7 +29,7 @@ from  live_plot import  init_live_plot, update_plots
 torch_device = "cuda:0" if torch.cuda.is_available() else "cpu"
 float_type = torch.float32
 
-batch_size = 12
+batch_size = 1024
 L = 8 
 lattice_shape = (L, L)
 link_shape = (2, L, L)
@@ -46,7 +46,7 @@ n_layers = 24
 n_knots = 9
 
 #Training parameters; 
-N_era = 100
+N_era = 10
 N_epoch = int(sys.argv[2])
 base_lr = float(sys.argv[3])
 lambda_l2 = float(sys.argv[4])
