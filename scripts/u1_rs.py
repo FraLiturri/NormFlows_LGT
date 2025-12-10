@@ -42,7 +42,7 @@ hidden_channels = [32, 32]
 kernel_size = 3
 in_channels = 6
 dilation = 1
-n_layers = 48
+n_layers = 24
 n_knots = 9
 
 #Training parameters; 
