@@ -12,10 +12,13 @@ neumc/src/nmcmc.egg-info/
 *.zip
 
 *.pdf
+scripts/*.png
 
 nmcmc-env/
 
 *.pt
+*.txt
+
 /docs/source/api/
 /docs/build/
 /neumc/src/neumc.egg-info/
@@ -29,3 +32,4 @@ notebooks/phi4/volume_hist.png
 
 _notes/
 tests.py
+scripts/weights.pt
