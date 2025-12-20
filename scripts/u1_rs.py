@@ -37,7 +37,7 @@ batch_size = 1024
 L = 16
 lattice_shape = (L, L)
 link_shape = (2, L, L)
-beta = int(sys.argv[1])
+beta = float(sys.argv[1])
 u1_action = u1.U1GaugeAction(beta)
 F_exact = -u1.logZ(L, beta=beta) - 2 * L * L * np.log(2 * np.pi)
 
