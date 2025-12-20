@@ -42,11 +42,11 @@ u1_action = u1.U1GaugeAction(beta)
 F_exact = -u1.logZ(L, beta=beta) - 2 * L * L * np.log(2 * np.pi)
 
 # Model parameters;
-hidden_channels = [32, 32, 32]
+hidden_channels = [32, 32]
 kernel_size = 3
 in_channels = 6
 dilation = 1
-n_layers = 24
+n_layers = 48
 n_knots = 9
 
 # Training parameters;
@@ -55,7 +55,7 @@ N_epoch = int(sys.argv[2])
 base_lr = float(sys.argv[3])
 lambda_l2 = float(sys.argv[4])
 print_freq = 10  # epochs
-plot_freq = 1  # epochs
+plot_freq = 5  # epochs
 
 masks = neumc.nf.gauge_masks.sch_2x1_masks_gen(
     lattice_shape=(L, L), float_dtype=float_type, device=torch_device
