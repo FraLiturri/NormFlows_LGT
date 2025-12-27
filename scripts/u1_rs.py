@@ -34,7 +34,7 @@ torch_device = "cuda:0" if torch.cuda.is_available() else "cpu"
 float_type = torch.float32
 
 batch_size = 1024
-L = 16
+L = 8
 lattice_shape = (L, L)
 link_shape = (2, L, L)
 beta = float(sys.argv[1])
@@ -42,11 +42,11 @@ u1_action = u1.U1GaugeAction(beta)
 F_exact = -u1.logZ(L, beta=beta) - 2 * L * L * np.log(2 * np.pi)
 
 # Model parameters;
-hidden_channels = [32, 32]
+hidden_channels = [8,8]
 kernel_size = 3
 in_channels = 6
 dilation = 1
-n_layers = 48
+n_layers = 24
 n_knots = 9
 
 # Training parameters;

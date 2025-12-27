@@ -2,7 +2,6 @@
 """Various normalizing flow utilities."""
 
 import torch
-
 from neumc.nf.flow_abc import Transformation
 
 

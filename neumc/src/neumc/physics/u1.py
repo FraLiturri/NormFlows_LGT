@@ -78,7 +78,7 @@ def compute_u1_2x1_loops(links):
     return torch.stack((u1_2x1_loops(links, 0, 1), u1_2x1_loops(links, 1, 0)), 1)
 
 
-class U1GaugeAction:  # simply the U(1) action;
+class U1GaugeAction:
     def __init__(self, beta):
         self.beta = beta
 
