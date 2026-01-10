@@ -3,7 +3,6 @@
 __all__ = ["assemble_model_from_dict"]
 
 import inspect
-
 import torch
 
 from neumc.nf.cs_coupling import CSCoupling
@@ -31,7 +30,6 @@ def assemble_model_from_dict(config, device, *, verbose=0):
     n_layers = config["n_layers"]
     float_dtype = config["float_dtype"]
     nn = config["nn"]
-
 
     match masking:
         case "schwinger":

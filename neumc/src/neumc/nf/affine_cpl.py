@@ -1,3 +1,4 @@
+# Status: done ✅
 from collections.abc import Sequence
 from typing import Iterator
 import torch
@@ -5,7 +6,6 @@ import torch
 from neumc.nf.nn import make_conv_net
 from neumc.nf.flow_abc import TransformationSequence
 from neumc.nf.coupling_flow import CouplingLayer
-
 
 class AffineTransform:
     def __init__(self):

@@ -1,7 +1,6 @@
-"""
-Utility functions to generate masks for U1 lattice gauge theory.
-"""
+"""Utility functions to generate masks for U1 lattice gauge theory."""
 
+# Status: done ✅
 from collections.abc import Sequence
 import torch
 import numpy as np

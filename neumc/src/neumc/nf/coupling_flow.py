@@ -4,10 +4,9 @@ This file contains the implementation of the coupling flows as described in [1].
 [1] Kobyzev I, Prince SJD, Brubaker MA. Normalizing Flows: An Introduction and Review of Current Methods.
 IEEE Trans Pattern Anal Mach Intell. 2021 Nov;43(11):3964-3979.
 """
-
+# Status: done ✅
 from collections.abc import Sequence
 from typing import Callable
-
 import torch
 from typing_extensions import override
 from neumc.nf.flow_abc import Transformation

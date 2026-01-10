@@ -2,11 +2,10 @@
 Utility functions to generate masks for U1 lattice gauge theory.
 """
 
+# Status: done ✅
 from collections.abc import Sequence
 from typing import Generator
-
 import torch
-
 import neumc
 
 

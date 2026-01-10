@@ -36,11 +36,7 @@ class U1GaugeEquivCouplingLayer(Transformation):
     """
 
     def __init__(
-        self,
-        *,
-        active_links_mask: torch.Tensor,
-        loops_function: Callable[[torch.Tensor], Sequence[torch.Tensor]] | None = None,
-        plaq_coupling: Transformation,
+        self, *, active_links_mask: torch.Tensor, loops_function: Callable[[torch.Tensor], Sequence[torch.Tensor]] | None = None, plaq_coupling: Transformation,
     ):
         super().__init__()
 

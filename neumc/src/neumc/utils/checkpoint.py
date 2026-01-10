@@ -1,8 +1,9 @@
+# Status: done ✅
 import tempfile
 from shutil import move
-
 import torch
 
+"""Functions to safely save checkpoint."""
 
 def save_checkpoint(*, model, optimizer, scheduler=None, era, path, **kwargs):
     to_save = {

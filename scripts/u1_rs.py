@@ -42,11 +42,11 @@ u1_action = u1.U1GaugeAction(beta)
 F_exact = -u1.logZ(L, beta=beta) - 2 * L * L * np.log(2 * np.pi)
 
 # Model parameters;
-hidden_channels = [8,8]
+hidden_channels = [8, 8]
 kernel_size = 3
 in_channels = 6
 dilation = 1
-n_layers = 24
+n_layers = 16
 n_knots = 9
 
 # Training parameters;
@@ -101,7 +101,7 @@ def clip_weights(model_layers, min_val=-1, max_val=1):  # Clipping function;
         param.data.clamp_(min_val, max_val)
 
 
-MODEL_WEIGHTS_PATH = "weights.pt"
+MODEL_WEIGHTS_PATH = "out_u1/weights.pt"
 # Check if weights file exists and load them
 if os.path.exists(MODEL_WEIGHTS_PATH):
     print(f"Loading existing weights from {MODEL_WEIGHTS_PATH}")
@@ -155,15 +155,19 @@ for era in range(N_era):
             um.print_dict(avg)
 
 
-# Save model weights after training
+#Save model weights after training
 print(f"\nSaving model weights to {MODEL_WEIGHTS_PATH}")
 torch.save(model["layers"].state_dict(), MODEL_WEIGHTS_PATH)
 print("Model weights saved successfully!")
 print(f"File size: {os.path.getsize(MODEL_WEIGHTS_PATH) / (1024**2):.2f} MB")
 
 # Sampling:
-u_2x1, lq_2x1 = neumc.nf.flow.sample(
-    n_samples=2**16, batch_size=2**10, prior=prior, layers=layers
+u_2x1, lq_2x1 = neumc.nf.flow.sample_mix(
+    n_samples=2**16,
+    batch_size=2**10,
+    prior=prior,
+    layers=layers, 
+    N = 20
 )
 lp_2x1 = -neumc.utils.batch_function.batch_action(
     u_2x1, batch_size=1024, action=u1_action, device=torch_device
@@ -185,7 +189,7 @@ ax.text(
     f"$\\log P = {fit_2x1.slope:.3}\\log q+{fit_2x1.intercept:.3f}$",
     transform=ax.transAxes,
 )
-plt.savefig(f"u1_rs_lr.png", bbox_inches="tight")
+plt.savefig(f"out_u1/u1_rs_lr.png", bbox_inches="tight")
 
 lw_2x1 = lp_2x1 - lq_2x1
 F_q_2x1, F_q_std_2x1 = torch_bootstrap(-lw_2x1, n_samples=100, binsize=1)
@@ -205,11 +209,12 @@ print(
 )
 
 Q = grab(u1.topo_charge(u_p))
+
 plt.figure(figsize=(5, 3.5), dpi=125)
-np.savetxt(f"Q{beta}.txt", Q)
+np.savetxt(f"out_u1/Q{beta}.txt", Q)
 plt.plot(Q)
 plt.title(r"$\beta = $" + f"{beta}")
 plt.xlabel(r"$t_{MC}$")
 plt.ylabel(r"topological charge $Q$")
-plt.savefig(f"u1_rs_Q.png", bbox_inches="tight")
-plt.show()
+plt.savefig(f"out_u1/u1_rs_Q.png", bbox_inches="tight")
+plt.close()

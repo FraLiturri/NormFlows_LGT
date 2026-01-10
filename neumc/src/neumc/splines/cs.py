@@ -1,9 +1,6 @@
-"""
-This module implements the rational spline flow.
-"""
+"""This module implements the rational spline flow."""
 
 import torch
-
 
 def make_idx(*dims, device="cpu"):
     r"""

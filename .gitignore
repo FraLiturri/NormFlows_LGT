@@ -30,6 +30,5 @@ notebooks/phi4/hist.png
 notebooks/phi4/*.png
 notebooks/phi4/volume_hist.png
 
-_notes/
 tests.py
-scripts/weights.pt
+docs/

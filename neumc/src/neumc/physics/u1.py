@@ -1,3 +1,4 @@
+# Status: done ✅
 import numpy as np
 import torch
 
@@ -42,7 +43,7 @@ if scipy_installed:
         return z + x - x * x / 2
 
 
-def set_weights(m):
+def set_weights(m): #sets weights and biases in the CNN; 
     if hasattr(m, "weight") and m.weight is not None:
         torch.nn.init.normal_(
             m.weight, mean=1, std=2
@@ -51,7 +52,7 @@ def set_weights(m):
         m.bias.data.fill_(-1)
 
 
-def compute_u1_plaq(links, mu, nu):
+def compute_u1_plaq(links, mu, nu): #returns the plaquette in the (mu,nu) plane;
     """Compute U(1) plaquettes in the (mu,nu) plane given `links` = arg(U)"""
     return torch_mod(
         links[:, mu]
@@ -62,7 +63,7 @@ def compute_u1_plaq(links, mu, nu):
     )
 
 
-def u1_2x1_loops(links, mu, nu):
+def u1_2x1_loops(links, mu, nu): #returns 2x1 loops; 
     return torch_mod(
         links[:, mu]
         + torch.roll(links[:, mu], -1, mu + 1)
@@ -74,7 +75,7 @@ def u1_2x1_loops(links, mu, nu):
     )
 
 
-def compute_u1_2x1_loops(links):
+def compute_u1_2x1_loops(links): #stacks all the 2x1 loops into a unique tensor;
     return torch.stack((u1_2x1_loops(links, 0, 1), u1_2x1_loops(links, 1, 0)), 1)
 
 

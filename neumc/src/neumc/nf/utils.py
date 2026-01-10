@@ -47,6 +47,5 @@ def prepare_u1_input(plaq, plaq_mask, loops=(), loops_masks=()):
 def softmax_with_minimum(x, dim, min_value):
     p = torch.softmax(x, dim)
     n = x.size(dim)
-    assert n * min_value <1
+    assert n * min_value < 1
     return (1 - n * min_value) * p + min_value
-

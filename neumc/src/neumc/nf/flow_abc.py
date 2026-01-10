@@ -1,7 +1,10 @@
+# Status: done ✅
 from abc import ABC, abstractmethod
+from neumc.physics.u1 import torch_mod
 from typing_extensions import override
 from typing import Iterable
 import torch
+import numpy as np
 
 
 class Transformation(
@@ -52,7 +55,25 @@ class Transformation(
         loog_J: torch.Tensor
             the log of the Jacobian determinant of the transformation
         """
-        return NotImplemented #if not overridden, returns NotImplemented;
+        return NotImplemented  # if not overridden, returns NotImplemented;
+
+    def sample_from_mix(self, prior, batch_size: int, *, N: int = 2):
+        z = prior.sample_n(batch_size)
+        x, log_J = self.forward(z)
+
+        x_mix = 0
+        z_mix = 0
+        for n in range(N):
+            x_mix += x + 2 * np.pi * n / N
+            z_mix += z + 2 * np.pi * n / N
+
+        z_mix = z_mix / N
+        x_mix = x_mix / N
+
+        z_mix = torch_mod(z_mix)
+        log_mix = prior.log_prob(z_mix)
+
+        return x_mix, log_mix - log_J - np.log(N)
 
     def sample(self, prior, batch_size: int):
         z = prior.sample_n(batch_size)
@@ -61,18 +82,22 @@ class Transformation(
         return x, log_prob_z - log_J
 
 
-class TransformationSequence(Transformation): #this class implements a sequence of transformations of type Transformation;
+class TransformationSequence(
+    Transformation
+):  # this class implements a sequence of transformations of type Transformation;
     def __init__(self, layers: Iterable[Transformation]):
         super().__init__()
         self.layers = torch.nn.ModuleList(layers)
 
     @override
     def forward(self, z) -> tuple[torch.Tensor, torch.Tensor]:
-        log_J = torch.zeros(z.shape[0], device=z.device) #z.device accesses the device where z is stored; 
+        log_J = torch.zeros(
+            z.shape[0], device=z.device
+        )  # z.device accesses the device where z is stored;
 
         for layer in self.layers:
             z, log_J_layer = layer.forward(z)
-            log_J += log_J_layer #log(a*b) = log(a) + log(b);
+            log_J += log_J_layer  # log(a*b) = log(a) + log(b);
 
         return z, log_J
 

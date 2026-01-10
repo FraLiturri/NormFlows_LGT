@@ -1,3 +1,5 @@
+# Status: done ✅
+"""Some useful functions to print and measure time."""
 def format_time(s):
     isec = int(s)
     secs = isec % 60

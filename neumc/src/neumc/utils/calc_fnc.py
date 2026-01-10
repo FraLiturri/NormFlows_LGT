@@ -1,3 +1,5 @@
+# Status: done ✅
+"""All deprecated."""
 from warnings import warn
 
 

@@ -1,3 +1,4 @@
+# Status: done ✅
 import torch
 
 
@@ -66,10 +67,10 @@ def make_conv_net(
     """
     sizes = [in_channels] + hidden_channels + [out_channels]
     net = []
-    dilations = _make_list(dilation, len(sizes) - 1)
+    dilations = _make_list(dilation, len(sizes) - 1) #creates a list of dilation values; necessary for the kernels applied at each channel; 
     kernel_sizes = _make_list(kernel_size, len(sizes) - 1)
     for i in range(len(sizes) - 1):
-        net.append(
+        net.append( #creating the network by concatenating the convolutional layers; 
             torch.nn.Conv2d(
                 sizes[i],
                 sizes[i + 1],
@@ -82,9 +83,10 @@ def make_conv_net(
                 bias=bias,
             )
         )
-        if i != len(sizes) - 2:
+        if i != len(sizes) - 2: #appends the activation function for each layer but the last; 
             net.append(activation())
         else:
             if use_final_tanh:
-                net.append(torch.nn.Tanh())
-    return torch.nn.Sequential(*net)
+                net.append(torch.nn.Tanh()) #appends tanh to the last layer if use_final_tanh is true; 
+    return torch.nn.Sequential(*net) #returns the network (info passed through the list net); 
+ 

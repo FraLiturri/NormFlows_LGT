@@ -1,6 +1,7 @@
 # This is modified code from https://arxiv.org/abs/2101.08176 by M.S. Albergo et all.
 """Various normalizing flow utilities."""
 
+# Status: done ✅
 import torch
 from neumc.nf.flow_abc import Transformation
 
@@ -25,7 +26,7 @@ def sample(
     -------
         samples and the log probability of the samples
     """
-    rem_size = n_samples
+    rem_size = n_samples 
     samples = []
     log_q = []
     while rem_size > 0:
@@ -33,13 +34,49 @@ def sample(
             batch_length = min(rem_size, batch_size)
             x, logq = layers.sample(prior, batch_size=batch_length)
 
+        samples.append(x.cpu()) #.cpu() creates a copy of the tensor, moving it to the cpu; 
+        log_q.append(logq.cpu())
+
+        rem_size -= batch_length # update remaining size; 
+
+    return torch.cat(samples, 0), torch.cat(log_q, -1)
+
+def sample_mix(
+    n_samples: int, batch_size: int, prior, layers: Transformation, *, N : int = 2
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """
+    Sample configurations from a mixture in batches of batch_size at a time.
+    Parameters
+    ----------
+    n_samples
+        number of configurations to sample
+    batch_size
+        number of configurations to sample at a time
+    prior
+        distribution to sample prior configurations from
+    layers
+        normalizing flow layers
+    N
+        number of mixture components
+    
+    Returns
+    -------
+        samples and the log probability of the samples
+    """
+    rem_size = n_samples
+    samples = []
+    log_q = []
+    while rem_size > 0:
+        with torch.no_grad():
+            batch_length = min(rem_size, batch_size)
+            x, logq = layers.sample_from_mix(prior, batch_size=batch_length, N = N)
+
         samples.append(x.cpu())
         log_q.append(logq.cpu())
 
         rem_size -= batch_length
 
     return torch.cat(samples, 0), torch.cat(log_q, -1)
-
 
 def log_prob(
     x: torch.Tensor, prior, layers: torch.nn.ModuleList | Transformation
@@ -56,7 +93,7 @@ def requires_grad(model, on=True):
         p.requires_grad = on
 
 
-def detach(model):
+def detach(model): #this and the following functions are useful to compute some quantities without gradients (better performances); 
     """Detach all parameters of a model."""
     requires_grad(model, False)
 

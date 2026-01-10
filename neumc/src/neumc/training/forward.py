@@ -1,8 +1,9 @@
+# Status: done ✅
 from typing import Callable, Concatenate, Generic, Iterable, Self, TypeVar
 from neumc.nf.flow_abc import Transformation
 import torch
 
-T = TypeVar("T")
+T = TypeVar("T") #defines a new var's type; in the following is used to assert that a certain input and an output must share the same type; 
 
 
 class RepeatIterator(Generic[T]):
