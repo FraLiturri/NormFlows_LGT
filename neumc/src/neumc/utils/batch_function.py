@@ -34,20 +34,22 @@ def batch_function(
     """
     rem_size = len(cfgs)
 
-    obs = []
+    #print("configs:", cfgs)
+
+    obs = [] #observables;
     i = 0
     while rem_size > 0:
         with torch.no_grad():
             batch_length = min(rem_size, batch_size)
-            o = function(cfgs[i : i + batch_length].to(device), **kwargs)
+            o = function(cfgs[i : i + batch_length].to(device), **kwargs) #applies functuon to the current batch; 
             obs.append(o.cpu())
             i += batch_length
             rem_size -= batch_length
-
+    #print("observables:", obs)
     return torch.cat(obs, -1)
 
 
-def batch_action(
+def batch_action( #applies a function to a set of configurations; 
     cfgs: torch.Tensor,
     *,
     action: Callable[[torch.Tensor], torch.Tensor],

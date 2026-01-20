@@ -1,7 +1,7 @@
 import torch
 
 
-def make_sin_cos(x):
+def make_sin_cos(x): #3 or 4 because the tensor containing data is structured as (batch, channels, L, L); 
     """Takes a 3 or 4 dimensional tensor and returns a four dimensional tensor that contains the cos and sin of the
     input concatenated along the dimension 1.
     If the input is three dimensional then dimension 1 is inserted into the output.
@@ -44,7 +44,7 @@ def prepare_u1_input(plaq, plaq_mask, loops=(), loops_masks=()):
     return torch.cat(net_in, dim=1)
 
 
-def softmax_with_minimum(x, dim, min_value):
+def softmax_with_minimum(x, dim, min_value): #sigmoid; 
     p = torch.softmax(x, dim)
     n = x.size(dim)
     assert n * min_value < 1

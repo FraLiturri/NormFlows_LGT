@@ -57,28 +57,11 @@ class Transformation(
         """
         return NotImplemented  # if not overridden, returns NotImplemented;
 
-    def sample_from_mix(self, prior, batch_size: int, *, N: int = 2):
-        z = prior.sample_n(batch_size)
-        x, log_J = self.forward(z)
-
-        x_mix = 0
-        z_mix = 0
-        for n in range(N):
-            x_mix += x + 2 * np.pi * n / N
-            z_mix += z + 2 * np.pi * n / N
-
-        z_mix = z_mix / N
-        x_mix = x_mix / N
-
-        z_mix = torch_mod(z_mix)
-        log_mix = prior.log_prob(z_mix)
-
-        return x_mix, log_mix - log_J - np.log(N)
-
     def sample(self, prior, batch_size: int):
         z = prior.sample_n(batch_size)
         log_prob_z = prior.log_prob(z)
         x, log_J = self.forward(z)
+        #print("log_q:", log_prob_z - log_J)
         return x, log_prob_z - log_J
 
 

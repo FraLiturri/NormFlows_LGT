@@ -1,5 +1,5 @@
 # Author: Piotr Białas
-
+#*
 """
 This module provides utility functions for loading configurations from yaml files and command line arguments using the
 omegaconf library. The main function is `get_config` that loads the configuration from the command line arguments and

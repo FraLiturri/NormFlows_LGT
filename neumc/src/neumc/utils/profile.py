@@ -1,6 +1,8 @@
 from collections import OrderedDict
 import torch
 
+#*
+"""used for optimization, profiling and diagnostics"""
 
 # Memory hooks
 class PackHook:

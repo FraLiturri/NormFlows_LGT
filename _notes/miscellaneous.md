@@ -7,7 +7,6 @@ Here are collected useful code pills, functions or anything that doesn't fall un
   - [zip and unzip](#zip-and-unzip)
   - [\*args and \*\*kwargs](#args-and-kwargs)
   - [warnings](#warnings)
-  - [functools](#functools)
 
 ## Type hints
 
@@ -84,5 +83,3 @@ import warnings
 
 warnings.warn("Warning!")
 ``` 
-
-## functools

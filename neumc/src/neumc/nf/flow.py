@@ -25,6 +25,16 @@ def sample(
     Returns
     -------
         samples and the log probability of the samples
+
+    Examples
+    --------
+    for samples = 2, batch_size = 1, this algorithm returns 
+    samples = [tensor(LxL matrix, LxL matrix), tensor(LxL matrix, LxL matrix)] 
+    log_q = [tensor(log_prob_1), tensor(log_prob_2)].
+    Each log_prob corresponds to the respective sample.
+
+    More in general, for samples = N, batch_size = B, the samples are divided into
+    N/B batches, each containing B samples; all the batches are collcted in the first dimension.
     """
     rem_size = n_samples 
     samples = []
@@ -38,43 +48,6 @@ def sample(
         log_q.append(logq.cpu())
 
         rem_size -= batch_length # update remaining size; 
-
-    return torch.cat(samples, 0), torch.cat(log_q, -1)
-
-def sample_mix(
-    n_samples: int, batch_size: int, prior, layers: Transformation, *, N : int = 2
-) -> tuple[torch.Tensor, torch.Tensor]:
-    """
-    Sample configurations from a mixture in batches of batch_size at a time.
-    Parameters
-    ----------
-    n_samples
-        number of configurations to sample
-    batch_size
-        number of configurations to sample at a time
-    prior
-        distribution to sample prior configurations from
-    layers
-        normalizing flow layers
-    N
-        number of mixture components
-    
-    Returns
-    -------
-        samples and the log probability of the samples
-    """
-    rem_size = n_samples
-    samples = []
-    log_q = []
-    while rem_size > 0:
-        with torch.no_grad():
-            batch_length = min(rem_size, batch_size)
-            x, logq = layers.sample_from_mix(prior, batch_size=batch_length, N = N)
-
-        samples.append(x.cpu())
-        log_q.append(logq.cpu())
-
-        rem_size -= batch_length
 
     return torch.cat(samples, 0), torch.cat(log_q, -1)
 

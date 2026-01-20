@@ -6,7 +6,7 @@ import time
 import matplotlib.pyplot as plt
 from scipy.special import iv
 from scipy.stats import linregress
-
+from neumc.utils import mixture
 import neumc
 import neumc.physics.u1 as u1
 import neumc.nf.flow as nf
@@ -161,19 +161,14 @@ torch.save(model["layers"].state_dict(), MODEL_WEIGHTS_PATH)
 print("Model weights saved successfully!")
 print(f"File size: {os.path.getsize(MODEL_WEIGHTS_PATH) / (1024**2):.2f} MB")
 
-# Sampling: #!Note that u_2x1 are NOT the plaquettes, but the link variables (angles); 
-u_2x1, lq_2x1 = neumc.nf.flow.sample(
-    n_samples=2**2,
-    batch_size=2**0,
-    prior=prior,
-    layers=layers
-) #shape of u_2x1: (n_samples, 2, L, L);
+link_trans = mixture.RandomLinksTransformation(device=torch_device)
+trans = [lambda x: x, link_trans]
+mix = mixture.AdaptiveMixture(transformations=trans, action=u1_action)
+u_2x1, lq_2x1 = mix(prior = prior, layers = layers, batch_size = 1, n_samples = 2**11)
 
 lp_2x1 = -neumc.utils.batch_function.batch_action(
     u_2x1, batch_size=1024, action=u1_action, device=torch_device
 )
-ess_2x1 = neumc.utils.ess(lp_2x1, lq_2x1)
-print(f"ESS: {ess_2x1}")
 
 fit_2x1 = linregress(lq_2x1, lp_2x1)
 fig, ax = plt.subplots(figsize=(8, 8))
