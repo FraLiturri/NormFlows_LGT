@@ -155,16 +155,20 @@ for era in range(N_era):
             um.print_dict(avg)
 
 
-#Save model weights after training
+# Save model weights after training
 print(f"\nSaving model weights to {MODEL_WEIGHTS_PATH}")
 torch.save(model["layers"].state_dict(), MODEL_WEIGHTS_PATH)
 print("Model weights saved successfully!")
 print(f"File size: {os.path.getsize(MODEL_WEIGHTS_PATH) / (1024**2):.2f} MB")
 
-link_trans = mixture.RandomLinksTransformation(device=torch_device)
-trans = [lambda x: x, link_trans]
+transformation = mixture.RandomLinksTransformation(shape=(L, L), device=torch_device)
+trans = [
+    lambda x: x,
+    transformation,
+]
+
 mix = mixture.AdaptiveMixture(transformations=trans, action=u1_action)
-u_2x1, lq_2x1 = mix(prior = prior, layers = layers, batch_size = 1, n_samples = 2**11)
+u_2x1, lq_2x1 = mix(prior=prior, layers=layers, batch_size=1, n_samples=2**11)
 
 lp_2x1 = -neumc.utils.batch_function.batch_action(
     u_2x1, batch_size=1024, action=u1_action, device=torch_device
@@ -203,7 +207,9 @@ print(
     f"F_NIS = {F_nis_2x1:.3f}+/-{F_nis_std_2x1:.4f} F_NIS-F_exact = {F_nis_2x1-F_exact:.4f}"
 )
 
-Q = grab(u1.topo_charge(u_p)) #!here plaquettes are computed internally: topo_charge calls compute_u1_plaq;
+Q = grab(
+    u1.topo_charge(u_p)
+)  #!here plaquettes are computed internally: topo_charge calls compute_u1_plaq;
 
 plt.figure(figsize=(5, 3.5), dpi=125)
 np.savetxt(f"out_u1/Q{beta}.txt", Q)
