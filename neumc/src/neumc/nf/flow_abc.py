@@ -80,7 +80,7 @@ class TransformationSequence(
 
         for layer in self.layers:
             z, log_J_layer = layer.forward(z)
-            log_J += log_J_layer  # log(a*b) = log(a) + log(b);
+            log_J += log_J_layer
 
         return z, log_J
 

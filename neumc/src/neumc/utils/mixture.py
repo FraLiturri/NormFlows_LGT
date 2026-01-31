@@ -1,11 +1,12 @@
+import neumc
 import numpy as np
-import neumc.nf.flow
-from neumc.utils.batch_function import batch_action
 import torch
-import math
-from neumc.physics.u1 import torch_mod, U1GaugeAction
-import neumc.nf.prior, neumc.nf.flow, neumc.nf.flow_abc
+from neumc.nf.flow_abc import TransformationSequence
 from torch.distributions import Categorical
+from typing import override
+from neumc.utils import grab
+from neumc.nf.u1_model_asm import assemble_model_from_dict
+
 
 """
 Personal note: each sample corresponds to two LxL matrices: the first one contains 
@@ -15,119 +16,142 @@ have to be considered.
 The transformation must be a volume preserving (and invertible) transformation and
 must act on two LxL matrices at a time.
 """
-def target_density(x, action) -> torch.Tensor:
-    return torch.exp(- action(x))
 
-class LinksTransformation:
-    def __init__(self, shape =(8,8), device = 'cpu'):
-        self.device = device
-        self.shape = shape
-    def apply(self) -> tuple[torch.Tensor, torch.Tensor]:
+class Mixture:
+    def __init__(self):
+        pass
+    @override
+    def mixture(self, *args, **kwargs):
+        pass
+    
+    def __call__(self, *args, **kwargs):
         pass
 
-    def __call__(self, config):
-        return self.apply(config)
+class DataLoader:
+    def __init__(self, *, path_to_folder: str, beta_min: int, beta_max: int, step: float, samples_size: int, L: int = 8):
+        self.path_to_folder = path_to_folder
+        self.beta_min = beta_min
+        self.beta_max = beta_max
+        self.step = step
+        self.samples_size = samples_size
+        self.L = L
+        self.epsilon = 1e-10
+        self.beta_values = np.arange(self.beta_min, self.beta_max + self.step - self.epsilon, self.step)
+    
+    def load_data(self):
+        self.samples = torch.zeros(len(self.beta_values), self.samples_size, 2, self.L, self.L)
+        for i in range(len(self.beta_values)):
+            current_path = self.path_to_folder + f'/data_{self.beta_values[i]}.pt'
+            data = torch.load(current_path, weights_only=False)
+            self.samples[i] = data['phi']
 
-class RandomLinksTransformation(LinksTransformation): #! Work in progress; 
-    """Given a certain configuration (i.e. two LxL matrices), a random matrix 
-    is sampled and added to the first matrix; then its transpose is added to 
-    the second matrix. In such a way the plaquette is preserved.
-    """
-    def __init__(self, shape, device = 'cpu'):
-        super().__init__(shape, device)
+        return self.samples
 
-    def transformation_matrices(self) -> torch.Tensor:
-        m1 = torch.rand(self.shape, device=self.device) * 2 * math.pi
-        m2 = m1.transpose(-2, -1)  # usa -2, -1 per gestire batch
-        print("random:", m1, m2)
-        return torch.stack((m1, m2))
+    def load_models(self, device: torch.device | str = "cpu") -> list:
+        self.models = []
+        for i in range(len(self.beta_values)):
+            path = self.path_to_folder + f"/checkpoint_{self.beta_values[i]}.pt"
+            checkpoint = torch.load(path, map_location=device)
 
-    def apply(self, config):        
-        m = self.transformation_matrices()
-        return config + m  
+            if "model_state_dict" not in checkpoint:
+                raise KeyError(f"Checkpoint {path} does not contain 'model_state_dict'.")
 
-class AdaptiveMixture:
-    """Implements and performs sampling from an adaptive mixture."""
-    def __init__(self, *, transformations: list, action):
-        self.transformations = transformations
-        self.mix_samples = []
-        self.log_q_mix = [] #! not implemented yet;
-        self.action = action
+            model_config = checkpoint.get("model_config", None)
+            if model_config is None:
+                raise ValueError(f"Checkpoint {path} does not contain 'model_config'.")
 
-    def sample_from_mix(self, *, prior, layers: neumc.nf.flow_abc.Transformation, n_samples: int, batch_size: int) -> tuple[torch.Tensor, torch.Tensor]:
-        rem_size = n_samples
+            config = {
+                "lattice_shape": model_config.get("lattice_shape", (8, 8)),
+                "masking": model_config.get("masking", "2x1"),
+                "coupling": model_config.get("coupling", "cs"),
+                "n_layers": model_config.get("n_layers", 24),
+                "n_knots": model_config.get("n_knots", 9),  # Necessario se coupling="cs"
+                "float_dtype": torch.float32,
+                "nn": {
+                    "hidden_channels": model_config.get("hidden_channels", [8, 8]),
+                    "kernel_size": model_config.get("kernel_size", 3),
+                    "dilation": model_config.get("dilation", 1),
+                },
+            }
 
-        while rem_size > 0: 
-            with torch.no_grad():
-                p_a = []
-                x_a_samples = []
-                batch_length = min(rem_size, batch_size)
-                x, logq = layers.sample(prior, batch_size=batch_length)
-                for t_a in self.transformations:
-                    x_a = t_a(x)
-                    x_a_samples.append(x_a)
-                    print(x_a)
-                    p_a.append(target_density(x_a, self.action))
+            model_bundle = assemble_model_from_dict(config, device=device)
+            
+            layers = model_bundle["layers"]
+            layers.load_state_dict(checkpoint["model_state_dict"])
+            
+            layers.eval()
+            self.models.append(layers)
 
-                p_a = torch.tensor(p_a / np.sum(p_a))
-                if len(self.transformations) > 1:
-                    p_a = p_a.squeeze()
+        return self.models
 
-                dist = Categorical(p_a) #create a categorical distribution based on the weights p_a;
-                sampled_index = dist.sample()
+class TemperedMixture(Mixture):
+    def __init__(self, *, changes: int = 100, dataloader : DataLoader, device : torch.device = 'cpu', L : int):
+        super().__init__()
+        self.samples = dataloader.samples
+        self.beta_max = dataloader.beta_max
+        self.beta_min = dataloader.beta_min
+        self.betas = dataloader.beta_values
+        self.device = device
+        self.L = L
 
-                #!to do: with batch_size = 1 works, but there's a bug for greater values. 
-                #!review the data structure. 
+        if changes > len(self.samples[0]):
+            raise ValueError("changes must be less than the number of samples")
 
-                x_a = x_a_samples[sampled_index]
+        self.changes = changes
+        self.new_samples = dataloader.samples[0].clone()
+
+    def weights_setter(self, *, power: float = 1.5):
+        weights = [k**power for k in range(self.beta_min, self.beta_max + 1)]
+        weights = torch.tensor(weights) / np.sum(weights)
+        dist = Categorical(weights) #building distribution;
+        return weights, dist
+
+    def sampler(self, * , weights : torch.Tensor | None = None, dist : Categorical | None = None, power : float = 1.5):
+        self.random_indexes = torch.randint(0, len(self.samples[0]), (self.changes,), dtype=torch.long, device=self.device)
+
+        if weights is None or dist is None:
+            self.weights, self.dist = self.weights_setter(power = power)
+        else:
+            self.weights = weights
+            self.dist = dist
+
+        self.weights = self.weights.to(self.device) #!weights have to be on the same device as the samples; 
+        counter = 0
+
+        while counter < self.changes:
+            sampled_index = int(self.dist.sample())
+            idx = int(self.random_indexes[counter])
+            self.new_samples[idx] = self.samples[sampled_index][idx]
+            counter += 1
+
+        return self.new_samples
+
+    def mix_builder(self, models: list[TransformationSequence] | None = None, device: torch.device | str = "cpu"):
+        if models is None: #sanity check; 
+            if hasattr(self, "models"):
+                models = self.models
+            else:
+                raise ValueError("Provide `models` or call `DataLoader.load_models()` first.")
+
+        if not hasattr(self, "weights"): #sanity check; 
+            self.weights, self.dist = self.weights_setter()
+            self.weights = self.weights.to(self.device)
+
+        self.mix = torch.zeros(len(self.new_samples), device=self.device)
+        self.log_q = torch.zeros(len(self.new_samples), device = self.device)
+        prior = neumc.nf.prior.MultivariateUniform(torch.zeros((2, self.L, self.L)), 2 * torch.pi * torch.ones(1), device=self.device)
+
+        with torch.no_grad():
+            self.mix = torch.zeros(len(self.new_samples), device= self.device)
+            for index, model in enumerate(models):
+                z, log_J = model.reverse(self.new_samples)
+                weight = self.weights[index]  #!log_prob_z = prior.log_prob(z) has to be added;
+                self.mix += weight * (prior.log_prob(z) - torch.exp(log_J))
                 
-            self.mix_samples.append(x_a.cpu()) 
-            self.log_q_mix.append(logq.cpu()) #since this trans. does not change the volume, log_q remains the same;
-            rem_size -= batch_length
-        return torch.cat(self.mix_samples, 0), torch.cat(self.log_q_mix, -1) #like u_2x1, lq_2x1 in u1_rs.py;
 
-    def __call__(self, *args, **kwargs):
-        return self.sample_from_mix(*args, **kwargs)
+            last_idx = len(self.betas)-1
+            z, log_J = models[last_idx].reverse(self.new_samples)
+            self.log_q =  log_J
+            print(self.log_q)
 
-
-class UniformMixture: #!work in progress
-    """Implements and performs sampling from an adaptive mixture."""
-    def __init__(self, *, transformations: list[callable], action):
-        self.transformations = transformations
-        self.mix_samples = []
-        self.log_q_mix = [] #! not implemented yet;
-        self.action = action
-
-    def sample_from_mix(self, *, prior, layers: neumc.nf.flow_abc.Transformation, n_samples: int, batch_size: int) -> tuple[torch.Tensor, torch.Tensor]:
-        rem_size = n_samples
-
-        while rem_size > 0: 
-            with torch.no_grad():
-                p_a = []
-                x_a_samples = []
-                batch_length = min(rem_size, batch_size)
-                x, logq = layers.sample(prior, batch_size=batch_length)
-                for t_a in self.transformations:
-                    x_a = t_a(x)
-                    x_a_samples.append(x_a)
-                    p_a.append(target_density(x_a, self.action))
-
-                p_a = torch.tensor(p_a / np.sum(p_a))
-                if len(self.transformations) > 1:
-                    p_a = p_a.squeeze()
-
-                dist = Categorical(p_a) #create a categorical distribution based on the weights p_a;
-                sampled_index = dist.sample()
-
-                #!to do: with batch_size = 1 works, but there's a bug for greater values. 
-                #!review the data structure. 
-
-                x_a = x_a_samples[sampled_index]
-                
-            self.mix_samples.append(x_a.cpu()) 
-            self.log_q_mix.append(logq.cpu()) #since this trans. does not change the volume, log_q remains the same;
-            rem_size -= batch_length
-        return torch.cat(self.mix_samples, 0), torch.cat(self.log_q_mix, -1) #like u_2x1, lq_2x1 in u1_rs.py;
-
-    def __call__(self, *args, **kwargs):
-        return self.sample_from_mix(*args, **kwargs)
+        return self.mix, self.log_q #returns the entire mixture and the last density for MH; 

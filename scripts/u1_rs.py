@@ -6,6 +6,7 @@ import time
 import matplotlib.pyplot as plt
 from scipy.special import iv
 from scipy.stats import linregress
+from neumc.utils.mixture import DataLoader, Mixture, TemperedMixture
 
 import neumc
 import neumc.physics.u1 as u1
@@ -85,58 +86,58 @@ layers = neumc.nf.u1_equiv.make_u1_equiv_layers(
     device=torch_device,
 )
 
-prior = neumc.nf.prior.MultivariateUniform(
-    torch.zeros(link_shape), 2 * torch.pi * torch.ones(1), device=torch_device
-)
+prior = neumc.nf.prior.MultivariateUniform(torch.zeros(link_shape), 2 * torch.pi * torch.ones(1), device=torch_device)
 z = prior.sample_n(12)
+
 plaq = u1.compute_u1_plaq(z, mu=0, nu=1)
 
 model = {"prior": prior, "layers": layers}
-
 history = {"dkl": [], "std_dkl": [], "loss": [], "ess": []}
 
+CHECKPOINT_PATH = f"out_u1/checkpoint.pt"
+BETA_CHECKPOINT_PATH = f"out_u1/checkpoint_{beta}.pt"
 
-def clip_weights(model_layers, min_val=-1, max_val=1):  # Clipping function;
-    for param in model_layers.parameters():
-        param.data.clamp_(min_val, max_val)
-
-
-MODEL_WEIGHTS_PATH = "out_u1/weights.pt"
-# Check if weights file exists and load them
-if os.path.exists(MODEL_WEIGHTS_PATH):
-    print(f"Loading existing weights from {MODEL_WEIGHTS_PATH}")
-    state_dict = torch.load(MODEL_WEIGHTS_PATH, weights_only=True)
-    model["layers"].load_state_dict(state_dict)
-    print("Weights loaded successfully!")
+# Carica checkpoint se esiste
+checkpoint_loaded = False
+if os.path.exists(CHECKPOINT_PATH):
+    print(f"Loading checkpoint from {CHECKPOINT_PATH}")
+    checkpoint = torch.load(CHECKPOINT_PATH, weights_only=False, map_location=torch_device)
+    
+    model["layers"].load_state_dict(checkpoint['model_state_dict'])
+    print(f"Checkpoint loaded successfully!")
+    checkpoint_loaded = True
 else:
-    print(f"No existing weights found at {MODEL_WEIGHTS_PATH}")
+    print(f"No checkpoint found at {CHECKPOINT_PATH}")
     print("Starting training with random initialization")
 
 
-optimizer = torch.optim.Adam(
-    model["layers"].parameters(), lr=base_lr, weight_decay=lambda_l2
-)
+# Definisci optimizer
+optimizer = torch.optim.Adam(model["layers"].parameters(), lr=base_lr)
+
+# Carica stati di optimizer se il checkpoint esiste
+if checkpoint_loaded:
+    if 'optimizer_state_dict' in checkpoint:
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        print("Optimizer state loaded.")
+        
+        # --- FIX: FORZA IL RESET DEL LR AL VALORE INIZIALE ---
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = base_lr
+        print(f"Learning Rate resettato manualmente a: {base_lr}")
+
 train_step3 = PathGradientEstimator(prior, layers, u1_action)
 
-[
-    plt.close(plt.figure(fignum)) for fignum in plt.get_fignums()
-]  # close all existing figures
+[plt.close(plt.figure(fignum)) for fignum in plt.get_fignums()]  # close all existing figures
 live_plot = init_live_plot(N_era, N_epoch, metric="dkl")
-live_plot["fig"].suptitle(
-    r"Training for $\beta = $" + f"{beta}"
-)  # Changed from live_plot['ax'].set_title to live_plot['fig'].suptitle
+live_plot["fig"].suptitle(r"Training for $\beta = $" + f"{beta}")  # Changed from live_plot['ax'].set_title to live_plot['fig'].suptitle
 start_time = time.time()
 
 for era in range(N_era):
     for epoch in range(N_epoch):
         optimizer.zero_grad()
         loss, log_q, log_p = train_step3.step(batch_size=batch_size)
-        torch.nn.utils.clip_grad_norm_(
-            model["layers"].parameters(), max_norm=1.0
-        )  # Gradient clipping
-        optimizer.step()
 
-        clip_weights(layers, min_val=-1, max_val=1)
+        optimizer.step()
 
         um.add_metrics(
             history,
@@ -155,23 +156,37 @@ for era in range(N_era):
             um.print_dict(avg)
 
 
-#Save model weights after training
-print(f"\nSaving model weights to {MODEL_WEIGHTS_PATH}")
-torch.save(model["layers"].state_dict(), MODEL_WEIGHTS_PATH)
-print("Model weights saved successfully!")
-print(f"File size: {os.path.getsize(MODEL_WEIGHTS_PATH) / (1024**2):.2f} MB")
+# Saving model after training;
+print(f"\nSaving complete checkpoint")
 
-# Sampling: #!Note that u_2x1 are NOT the plaquettes, but the link variables (angles); 
-u_2x1, lq_2x1 = neumc.nf.flow.sample(
-    n_samples=2**2,
-    batch_size=2**0,
-    prior=prior,
-    layers=layers
-) #shape of u_2x1: (n_samples, 2, L, L);
+checkpoint = {
+    'model_state_dict': model["layers"].state_dict(),
+    'optimizer_state_dict': optimizer.state_dict(),
+    'model_config': {
+        'hidden_channels': hidden_channels,
+        'kernel_size': kernel_size,
+        'in_channels': in_channels,
+        'dilation': dilation,
+        'n_layers': n_layers,
+        'n_knots': n_knots,
+        'lattice_shape': lattice_shape,
+    },
+    'training_config': {
+        'batch_size': batch_size,
+        'base_lr': base_lr,
+    }
+}
 
-lp_2x1 = -neumc.utils.batch_function.batch_action(
-    u_2x1, batch_size=1024, action=u1_action, device=torch_device
-)
+torch.save(checkpoint, BETA_CHECKPOINT_PATH)
+torch.save(checkpoint, CHECKPOINT_PATH)
+
+print(f"Checkpoint saved to {BETA_CHECKPOINT_PATH}")
+print(f"Latest checkpoint saved to {CHECKPOINT_PATH}")
+print(f"File size: {os.path.getsize(CHECKPOINT_PATH) / (1024**2):.2f} MB")
+
+# Sampling: #!Note that u_2x1 are NOT the plaquettes, but the link variables (angles);
+u_2x1, lq_2x1 = neumc.nf.flow.sample(n_samples=2**15, batch_size=2**10, prior=prior, layers=layers)  # shape of u_2x1: (n_samples, 2, L, L);
+lp_2x1 = -neumc.utils.batch_function.batch_action(u_2x1, batch_size=1024, action=u1_action, device=torch_device)
 ess_2x1 = neumc.utils.ess(lp_2x1, lq_2x1)
 print(f"ESS: {ess_2x1}")
 
@@ -202,13 +217,28 @@ F_nis_2x1, F_nis_std_2x1 = torch_bootstrapf(
 
 u_p, s_p, s_q, accepted = metropolize(u_2x1, lq_2x1, lp_2x1)
 
+fit_2x1 = linregress(s_q, s_p)
+fig, ax = plt.subplots(figsize=(8, 8))
+ax.set_aspect(1)
+ax.set_xlabel(r"$\log q$")
+ax.set_ylabel(r"$\log P$")
+lqs = np.linspace(s_q.min(), s_q.max(), 100)
+ax.scatter(s_q, s_p, s=5, alpha=0.25)
+ax.plot(lqs, lqs * fit_2x1.slope + fit_2x1.intercept, color="red", zorder=10)
+ax.text(
+    0.15,
+    0.85,
+    f"$\\log P = {fit_2x1.slope:.3}\\log q+{fit_2x1.intercept:.3f}$",
+    transform=ax.transAxes,
+)
+plt.savefig(f"out_u1/S_fit.png", bbox_inches="tight")
+
+
 print("Accept rate is:", float(accepted.count_nonzero()) / len(accepted) * 100, "%")
 print(f"F_q = {F_q_2x1:.4f}+/-{F_q_std_2x1:.4f}  F_q-F_exact = {F_q_2x1 - F_exact:.5f}")
-print(
-    f"F_NIS = {F_nis_2x1:.3f}+/-{F_nis_std_2x1:.4f} F_NIS-F_exact = {F_nis_2x1-F_exact:.4f}"
-)
+print(f"F_NIS = {F_nis_2x1:.3f}+/-{F_nis_std_2x1:.4f} F_NIS-F_exact = {F_nis_2x1-F_exact:.4f}")
 
-Q = grab(u1.topo_charge(u_p)) #!here plaquettes are computed internally: topo_charge calls compute_u1_plaq;
+Q = grab(u1.topo_charge(u_p))  #!here plaquettes are computed internally: topo_charge calls compute_u1_plaq;
 
 plt.figure(figsize=(5, 3.5), dpi=125)
 np.savetxt(f"out_u1/Q{beta}.txt", Q)
@@ -218,3 +248,60 @@ plt.xlabel(r"$t_{MC}$")
 plt.ylabel(r"topological charge $Q$")
 plt.savefig(f"out_u1/u1_rs_Q.png", bbox_inches="tight")
 plt.close()
+
+fig, ax = plt.subplots(figsize=(5, 3.5), dpi=125)
+ax.hist(grab(s_q).astype(np.float64), bins=100, alpha=0.5, label=r"proposal (q)")
+ax.hist(grab(s_p).astype(np.float64), bins=100, alpha=0.5, label=r"target (p)")
+ax.set_xlabel("value")
+ax.set_ylabel("counts")
+ax.legend()
+plt.savefig(f"out_u1/u1_rs_weights_{beta}.png", bbox_inches="tight")
+plt.close()
+
+data_to_save = {"phi": u_p.cpu()}
+torch.save(data_to_save, f'out_u1/data_{beta}.pt')
+
+do_mix = True
+if do_mix:
+    dataloader = DataLoader(path_to_folder="out_u1", beta_min=1, beta_max=2, step=1, samples_size=2**15, L=L)
+    data = dataloader.load_data()
+    models = dataloader.load_models()
+
+    mixture = TemperedMixture(dataloader=dataloader, changes=1000, device = torch_device, L = L)
+    all_samples = mixture.sampler(power = 2)
+    mix, log_q = mixture.mix_builder(models = models, device = torch_device)
+    lp_mix = -neumc.utils.batch_function.batch_action(mixture.new_samples, batch_size=1024, action=u1_action, device=torch_device)
+
+    from neumc.mc import mixture_metropolize
+
+    u_p, s_p, s_q, accepted = mixture_metropolize(mixture = mix, log_q= log_q, log_p= lp_mix, samples_q = mixture.new_samples)
+
+    print("Accept rate is:", float(accepted.count_nonzero()) / len(accepted) * 100, "%")
+
+    fit_2x1 = linregress(s_q, -s_p)
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.set_aspect(1)
+    ax.set_xlabel(r"$\log q$")
+    ax.set_ylabel(r"$\log P$")
+    lqs = np.linspace(s_q.min(), s_q.max(), 100)
+    ax.scatter(s_q, -s_p, s=5, alpha=0.25)
+    ax.plot(lqs, lqs * fit_2x1.slope + fit_2x1.intercept, color="red", zorder=10)
+    ax.text(
+        0.15,
+        0.85,
+        f"$\\log P = {fit_2x1.slope:.3}\\log q+{fit_2x1.intercept:.3f}$",
+        transform=ax.transAxes,
+    )
+   
+    plt.savefig(f"out_u1/u1_rs_lr_mix.png", bbox_inches="tight")
+
+    Q = grab(u1.topo_charge(u_p))  #!here plaquettes are computed internally: topo_charge calls compute_u1_plaq;
+
+    plt.figure(figsize=(5, 3.5), dpi=125)
+    np.savetxt(f"out_u1/Q{beta}.txt", Q)
+    plt.plot(Q)
+    plt.title(r"$\beta = $" + f"{beta}")
+    plt.xlabel(r"$t_{MC}$")
+    plt.ylabel(r"topological charge $Q$")
+    plt.savefig(f"out_u1/u1_rs_Q_mix.png", bbox_inches="tight")
+    plt.close()

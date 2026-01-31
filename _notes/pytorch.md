@@ -22,6 +22,7 @@ Pytorch is an open-source deep learning framework designed to simplify the proce
   - [Train the model](#train-the-model)
   - [Testing the model](#testing-the-model)
 - [Moving data or model to device](#moving-data-or-model-to-device)
+- [Load from checkpoint: rebuilding the model](#load-from-checkpoint-rebuilding-the-model)
 
 # Tensors
 
@@ -277,3 +278,45 @@ x = torch.randn(1,2)
 x.to(device)
 ```
 tensor operations are permitted if on the same device. The same device has to be used for input, training and testing. 
+
+# Load from checkpoint: rebuilding the model
+To correctly rebuild a the NN from a checkpoint it's important to follow same precise steps. 
+Let's assume the model is saved in a dictionary as below: 
+```python 
+checkpoint = {
+    'model_state_dict': model["layers"].state_dict(),
+    'optimizer_state_dict': optimizer.state_dict(),
+    'model_config': {
+        'hidden_channels': hidden_channels,
+        'kernel_size': kernel_size,
+        'in_channels': in_channels,
+        'dilation': dilation,
+        'n_layers': n_layers,
+        'n_knots': n_knots,
+        'lattice_shape': lattice_shape,
+    },
+    'training_config': {
+        'batch_size': batch_size,
+        'base_lr': base_lr,
+    }
+}
+```
+here we are interested in loading the weights, rebuild the NN: 
+```python
+import torch
+
+checkpoint = torch.load('path_to_checkpoint/checkpoint.pt')
+config = checkpoint['model_config']
+model_layers = ModelClass(
+    hidden_channels=config['hidden_channels'],
+    kernel_size=config['kernel_size'],
+    in_channels=config['in_channels'],
+    dilation=config['dilation'],
+    n_layers=config['n_layers'],
+    n_knots=config['n_knots'],
+    lattice_shape=config['lattice_shape']
+)
+
+model_layers.load_state_dict(checkpoint['model_state_dict']) #loading weights; 
+model_layers.eval() #switching the model to eval mod; 
+```
