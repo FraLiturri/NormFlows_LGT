@@ -185,7 +185,7 @@ print(f"Latest checkpoint saved to {CHECKPOINT_PATH}")
 print(f"File size: {os.path.getsize(CHECKPOINT_PATH) / (1024**2):.2f} MB")
 
 # Sampling: #!Note that u_2x1 are NOT the plaquettes, but the link variables (angles);
-u_2x1, lq_2x1 = neumc.nf.flow.sample(n_samples=2**15, batch_size=2**10, prior=prior, layers=layers)  # shape of u_2x1: (n_samples, 2, L, L);
+u_2x1, lq_2x1 = neumc.nf.flow.sample(n_samples=2**17, batch_size=2**12, prior=prior, layers=layers)  # shape of u_2x1: (n_samples, 2, L, L);
 lp_2x1 = -neumc.utils.batch_function.batch_action(u_2x1, batch_size=1024, action=u1_action, device=torch_device)
 ess_2x1 = neumc.utils.ess(lp_2x1, lq_2x1)
 print(f"ESS: {ess_2x1}")
@@ -241,7 +241,7 @@ print(f"F_NIS = {F_nis_2x1:.3f}+/-{F_nis_std_2x1:.4f} F_NIS-F_exact = {F_nis_2x1
 Q = grab(u1.topo_charge(u_p))  #!here plaquettes are computed internally: topo_charge calls compute_u1_plaq;
 
 plt.figure(figsize=(5, 3.5), dpi=125)
-np.savetxt(f"out_u1/Q{beta}.txt", Q)
+np.savetxt(f"out_u1/Q_nomix{beta}.txt", Q)
 plt.plot(Q)
 plt.title(r"$\beta = $" + f"{beta}")
 plt.xlabel(r"$t_{MC}$")
@@ -249,25 +249,16 @@ plt.ylabel(r"topological charge $Q$")
 plt.savefig(f"out_u1/u1_rs_Q.png", bbox_inches="tight")
 plt.close()
 
-fig, ax = plt.subplots(figsize=(5, 3.5), dpi=125)
-ax.hist(grab(s_q).astype(np.float64), bins=100, alpha=0.5, label=r"proposal (q)")
-ax.hist(grab(s_p).astype(np.float64), bins=100, alpha=0.5, label=r"target (p)")
-ax.set_xlabel("value")
-ax.set_ylabel("counts")
-ax.legend()
-plt.savefig(f"out_u1/u1_rs_weights_{beta}.png", bbox_inches="tight")
-plt.close()
-
 data_to_save = {"phi": u_p.cpu()}
 torch.save(data_to_save, f'out_u1/data_{beta}.pt')
 
 do_mix = True
-if do_mix:
-    dataloader = DataLoader(path_to_folder="out_u1", beta_min=1, beta_max=2, step=1, samples_size=2**15, L=L)
+if do_mix and beta > 1:
+    dataloader = DataLoader(path_to_folder="out_u1", beta_min=1, beta_max=beta, step=1, samples_size=2**17, L=L)
     data = dataloader.load_data()
     models = dataloader.load_models()
 
-    mixture = TemperedMixture(dataloader=dataloader, changes=1000, device = torch_device, L = L)
+    mixture = TemperedMixture(dataloader=dataloader, changes=10000, device = torch_device, L = L)
     all_samples = mixture.sampler(power = 2)
     mix, log_q = mixture.mix_builder(models = models, device = torch_device)
     lp_mix = -neumc.utils.batch_function.batch_action(mixture.new_samples, batch_size=1024, action=u1_action, device=torch_device)
@@ -278,13 +269,13 @@ if do_mix:
 
     print("Accept rate is:", float(accepted.count_nonzero()) / len(accepted) * 100, "%")
 
-    fit_2x1 = linregress(s_q, -s_p)
+    fit_2x1 = linregress(s_q, s_p)
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_aspect(1)
     ax.set_xlabel(r"$\log q$")
     ax.set_ylabel(r"$\log P$")
     lqs = np.linspace(s_q.min(), s_q.max(), 100)
-    ax.scatter(s_q, -s_p, s=5, alpha=0.25)
+    ax.scatter(s_q, s_p, s=5, alpha=0.25)
     ax.plot(lqs, lqs * fit_2x1.slope + fit_2x1.intercept, color="red", zorder=10)
     ax.text(
         0.15,
@@ -293,12 +284,12 @@ if do_mix:
         transform=ax.transAxes,
     )
    
-    plt.savefig(f"out_u1/u1_rs_lr_mix.png", bbox_inches="tight")
+    plt.savefig(f"out_u1/S_fit_mix.png", bbox_inches="tight")
 
     Q = grab(u1.topo_charge(u_p))  #!here plaquettes are computed internally: topo_charge calls compute_u1_plaq;
 
     plt.figure(figsize=(5, 3.5), dpi=125)
-    np.savetxt(f"out_u1/Q{beta}.txt", Q)
+    np.savetxt(f"out_u1/Q_{beta}.txt", Q)
     plt.plot(Q)
     plt.title(r"$\beta = $" + f"{beta}")
     plt.xlabel(r"$t_{MC}$")

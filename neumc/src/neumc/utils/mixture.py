@@ -145,13 +145,11 @@ class TemperedMixture(Mixture):
             self.mix = torch.zeros(len(self.new_samples), device= self.device)
             for index, model in enumerate(models):
                 z, log_J = model.reverse(self.new_samples)
-                weight = self.weights[index]  #!log_prob_z = prior.log_prob(z) has to be added;
-                self.mix += weight * (prior.log_prob(z) - torch.exp(log_J))
-                
+                weight = self.weights[index]
+                self.mix += weight * torch.exp(prior.log_prob(z) + log_J)
 
-            last_idx = len(self.betas)-1
+            last_idx = len(self.betas) - 1
             z, log_J = models[last_idx].reverse(self.new_samples)
-            self.log_q =  log_J
-            print(self.log_q)
+            self.log_q = prior.log_prob(z) + log_J
 
         return self.mix, self.log_q #returns the entire mixture and the last density for MH; 
