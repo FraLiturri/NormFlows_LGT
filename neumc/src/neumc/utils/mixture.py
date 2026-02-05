@@ -3,7 +3,6 @@ import numpy as np
 import torch
 from neumc.nf.flow_abc import TransformationSequence
 from torch.distributions import Categorical
-from typing import override
 from neumc.utils import grab
 from neumc.nf.u1_model_asm import assemble_model_from_dict
 
@@ -20,7 +19,7 @@ must act on two LxL matrices at a time.
 class Mixture:
     def __init__(self):
         pass
-    @override
+
     def mixture(self, *args, **kwargs):
         pass
     
@@ -101,8 +100,8 @@ class TemperedMixture(Mixture):
         self.new_samples = dataloader.samples[0].clone()
 
     def weights_setter(self, *, power: float = 1.5):
-        weights = [k**power for k in range(self.beta_min, self.beta_max + 1)]
-        weights = torch.tensor(weights) / np.sum(weights)
+        weights = torch.tensor([float(k)**power for k in self.betas], device=self.device)
+        weights = weights / torch.sum(weights)
         dist = Categorical(weights) #building distribution;
         return weights, dist
 
@@ -148,7 +147,7 @@ class TemperedMixture(Mixture):
                 weight = self.weights[index]
                 self.mix += weight * torch.exp(prior.log_prob(z) + log_J)
 
-            last_idx = len(self.betas) - 1
+            last_idx = - 1
             z, log_J = models[last_idx].reverse(self.new_samples)
             self.log_q = prior.log_prob(z) + log_J
 

@@ -185,9 +185,10 @@ print(f"Latest checkpoint saved to {CHECKPOINT_PATH}")
 print(f"File size: {os.path.getsize(CHECKPOINT_PATH) / (1024**2):.2f} MB")
 
 # Sampling: #!Note that u_2x1 are NOT the plaquettes, but the link variables (angles);
-u_2x1, lq_2x1 = neumc.nf.flow.sample(n_samples=2**17, batch_size=2**12, prior=prior, layers=layers)  # shape of u_2x1: (n_samples, 2, L, L);
+u_2x1, lq_2x1 = neumc.nf.flow.sample(n_samples=2**12, batch_size=2**10, prior=prior, layers=layers)  # shape of u_2x1: (n_samples, 2, L, L);
 lp_2x1 = -neumc.utils.batch_function.batch_action(u_2x1, batch_size=1024, action=u1_action, device=torch_device)
 ess_2x1 = neumc.utils.ess(lp_2x1, lq_2x1)
+
 print(f"ESS: {ess_2x1}")
 
 fit_2x1 = linregress(lq_2x1, lp_2x1)
@@ -254,12 +255,12 @@ torch.save(data_to_save, f'out_u1/data_{beta}.pt')
 
 do_mix = True
 if do_mix and beta > 1:
-    dataloader = DataLoader(path_to_folder="out_u1", beta_min=1, beta_max=beta, step=1, samples_size=2**17, L=L)
+    dataloader = DataLoader(path_to_folder="out_u1", beta_min=1, beta_max=beta, step=1, samples_size=2**12, L=L)
     data = dataloader.load_data()
     models = dataloader.load_models()
 
-    mixture = TemperedMixture(dataloader=dataloader, changes=10000, device = torch_device, L = L)
-    all_samples = mixture.sampler(power = 2)
+    mixture = TemperedMixture(dataloader=dataloader, changes=100, device = torch_device, L = L)
+    all_samples = mixture.sampler(power = 1.5)
     mix, log_q = mixture.mix_builder(models = models, device = torch_device)
     lp_mix = -neumc.utils.batch_function.batch_action(mixture.new_samples, batch_size=1024, action=u1_action, device=torch_device)
 

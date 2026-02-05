@@ -4,5 +4,5 @@
     ],
     "foam.files.defaultNoteExtension": "ipynb",
     "foam.files.newNotePath": "currentDir",
-    "foam.files.notesExtensions": "ipynb"
+    "foam.files.notesExtensions": "ipynb",
 }
