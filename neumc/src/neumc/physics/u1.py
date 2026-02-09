@@ -2,9 +2,11 @@
 import numpy as np
 import torch
 
+
 scipy_installed = True
 try:
     from scipy.special import iv
+    from scipy.integrate import quad
 except ImportError as e:
     scipy_installed = False
     print(f"scipy is not installed: {e}")
@@ -152,3 +154,23 @@ def topo_charge(x):
     P01 = torch_wrap(compute_u1_plaq(x, mu=0, nu=1))
     axes = tuple(range(1, len(P01.shape)))
     return torch.sum(P01, dim=axes) / (2 * np.pi)
+
+
+class U1TopologicalSusceptibility:
+    def __init__(self, *, vol, beta):
+        self.vol = vol
+        self.beta = beta
+
+    def exp_elem(self, beta, k):
+        return np.exp(-2 * np.pi**2 * beta * k**2 / self.vol)
+
+    def I_0(self, x, beta):
+        return np.exp(beta * np.cos(x)) / (2 * np.pi)
+
+    def func(self, x, beta):
+        norm_I_0, _ = quad(lambda t: self.I_0(t, beta), -np.pi, np.pi)
+        return x**2 * np.exp(beta * np.cos(x)) / ((2 * np.pi) ** 3 * norm_I_0)
+
+    def compute_chi_theory(self):
+        chi, _ = quad(lambda x: self.func(x, self.beta), -np.pi, np.pi)
+        return chi

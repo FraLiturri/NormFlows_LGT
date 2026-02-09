@@ -1,0 +1,43 @@
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.001
+Performing reverse training
+ > Era   0 epoch    0 ellapsed time 2.0
+dkl -62.5556
+std_dkl 0.289861
+loss -7.31041
+ess 0.920879
+ > Era   0 epoch   10 ellapsed time 19.5
+dkl -62.5503
+std_dkl 0.275917
+loss -7.12293
+ess 0.928512
+ > Era   1 epoch    0 ellapsed time 36.2
+dkl -62.5518
+std_dkl 0.271631
+loss -7.12119
+ess 0.930574
+ > Era   1 epoch   10 ellapsed time 54.1
+dkl -62.5551
+std_dkl 0.267395
+loss -7.02983
+ess 0.932221
+ > Era   2 epoch    0 ellapsed time 74.7
+dkl -62.5523
+std_dkl 0.263233
+loss -6.90322
+ess 0.934204
+ > Era   2 epoch   10 ellapsed time 93.2
+dkl -62.5505
+std_dkl 0.259678
+loss -6.98245
+ess 0.93612
+ > Era   3 epoch    0 ellapsed time 110.2
+dkl -62.5522
+std_dkl 0.256016
+loss -7.07837
+ess 0.937953
+ > Era   3 epoch   10 ellapsed time 130.7
+dkl -62.5522
+std_dkl 0.253863
+loss -7.05779
+ess 0.938798
