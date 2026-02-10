@@ -51,3 +51,389 @@ dkl -62.5545
 std_dkl 0.248926
 loss -7.09719
 ess 0.941077
+ > Era   5 epoch    0 ellapsed time 189.6
+dkl -62.5556
+std_dkl 0.247949
+loss -6.89127
+ess 0.941878
+ > Era   5 epoch   10 ellapsed time 208.8
+dkl -62.5552
+std_dkl 0.243993
+loss -6.96479
+ess 0.943855
+ > Era   6 epoch    0 ellapsed time 228.1
+dkl -62.5544
+std_dkl 0.239428
+loss -7.15355
+ess 0.946023
+ > Era   6 epoch   10 ellapsed time 245.8
+dkl -62.5554
+std_dkl 0.238506
+loss -7.07417
+ess 0.94602
+ > Era   7 epoch    0 ellapsed time 263.0
+dkl -62.5577
+std_dkl 0.238971
+loss -6.92856
+ess 0.945936
+ > Era   7 epoch   10 ellapsed time 287.3
+dkl -62.5599
+std_dkl 0.237162
+loss -6.90304
+ess 0.946695
+ > Era   8 epoch    0 ellapsed time 312.2
+dkl -62.5612
+std_dkl 0.234295
+loss -7.04052
+ess 0.94732
+ > Era   8 epoch   10 ellapsed time 333.3
+dkl -62.5614
+std_dkl 0.231979
+loss -7.1378
+ess 0.948607
+ > Era   9 epoch    0 ellapsed time 354.5
+dkl -62.5615
+std_dkl 0.23013
+loss -7.10304
+ess 0.949114
+ > Era   9 epoch   10 ellapsed time 380.3
+dkl -62.5611
+std_dkl 0.226445
+loss -7.11646
+ess 0.95067
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_1.0.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 87.2314453125 %
+F_q = -62.5654+/-0.0033  F_q-F_exact = 0.02132
+F_NIS = -62.590+/-0.0036 F_NIS-F_exact = -0.0030
+Chi NIS: 4.060481e-02 +/- 8.222268e-04
+Chi teorico: 4.063624e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_1.1.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 79.7607421875 %
+F_q = -63.2682+/-0.0060  F_q-F_exact = 0.06049
+F_NIS = -63.332+/-0.0054 F_NIS-F_exact = -0.0030
+Chi NIS: 3.734850e-02 +/- 7.380039e-04
+Chi teorico: 3.758377e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_1.2.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 70.703125 %
+F_q = -63.9709+/-0.0073  F_q-F_exact = 0.15289
+F_NIS = -64.132+/-0.0089 F_NIS-F_exact = -0.0079
+Chi NIS: 3.430656e-02 +/- 8.014383e-04
+Chi teorico: 3.476625e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_1.3.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 60.1318359375 %
+F_q = -64.6615+/-0.0101  F_q-F_exact = 0.30698
+F_NIS = -64.955+/-0.0120 F_NIS-F_exact = 0.0138
+Chi NIS: 3.115416e-02 +/- 8.578349e-04
+Chi teorico: 3.217518e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_1.4.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 50.9765625 %
+F_q = -65.3955+/-0.0189  F_q-F_exact = 0.46386
+F_NIS = -65.869+/-0.0173 F_NIS-F_exact = -0.0091
+Chi NIS: 2.970720e-02 +/- 6.672181e-04
+Chi teorico: 2.979999e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_1.5.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 41.3330078125 %
+F_q = -66.0663+/-0.0205  F_q-F_exact = 0.72690
+F_NIS = -66.793+/-0.0209 F_NIS-F_exact = -0.0003
+Chi NIS: 2.661529e-02 +/- 7.926021e-04
+Chi teorico: 2.762860e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_1.6.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 32.861328125 %
+F_q = -66.7756+/-0.0243  F_q-F_exact = 0.99113
+F_NIS = -67.765+/-0.0255 F_NIS-F_exact = 0.0015
+Chi NIS: 2.593261e-02 +/- 8.490614e-04
+Chi teorico: 2.564803e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_1.7.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 27.8076171875 %
+F_q = -67.4725+/-0.0292  F_q-F_exact = 1.30452
+F_NIS = -68.826+/-0.0406 F_NIS-F_exact = -0.0485
+Chi NIS: 2.327521e-02 +/- 1.164014e-03
+Chi teorico: 2.384477e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_1.8.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 22.0458984375 %
+F_q = -68.2387+/-0.0322  F_q-F_exact = 1.58272
+F_NIS = -69.943+/-0.0489 F_NIS-F_exact = -0.1215
+Chi NIS: 1.939430e-02 +/- 1.206101e-03
+Chi teorico: 2.220521e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_1.9.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 18.3349609375 %
+F_q = -68.9178+/-0.0322  F_q-F_exact = 1.97948
+F_NIS = -70.876+/-0.0504 F_NIS-F_exact = 0.0210
+Chi NIS: 1.957372e-02 +/- 1.233399e-03
+Chi teorico: 2.071596e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.0001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_2.0.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 15.966796875 %
+F_q = -69.5453+/-0.0392  F_q-F_exact = 2.45696
+F_NIS = -71.848+/-0.0611 F_NIS-F_exact = 0.1547
+Chi NIS: 2.088386e-02 +/- 1.818996e-03
+Chi teorico: 1.936405e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.0001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_2.1.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 10.9130859375 %
+F_q = -70.2960+/-0.0428  F_q-F_exact = 2.83818
+F_NIS = -73.104+/-0.0625 F_NIS-F_exact = 0.0299
+Chi NIS: 1.814455e-02 +/- 1.828300e-03
+Chi teorico: 1.813710e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.0001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_2.2.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 9.1796875 %
+F_q = -70.9958+/-0.0468  F_q-F_exact = 3.29517
+F_NIS = -74.152+/-0.0726 F_NIS-F_exact = 0.1394
+Chi NIS: 1.774707e-02 +/- 1.746088e-03
+Chi teorico: 1.702346e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.0001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_2.3.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 4.4921875 %
+F_q = -71.7016+/-0.0528  F_q-F_exact = 3.76915
+F_NIS = -75.407+/-0.1193 F_NIS-F_exact = 0.0642
+Chi NIS: 1.414229e-02 +/- 1.746818e-03
+Chi teorico: 1.601229e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.0001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_2.4.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 6.2744140625 %
+F_q = -72.4186+/-0.0571  F_q-F_exact = 4.25330
+F_NIS = -76.891+/-0.1723 F_NIS-F_exact = -0.2190
+Chi NIS: 9.661498e-03 +/- 1.778144e-03
+Chi teorico: 1.509354e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.0001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_2.5.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 6.005859375 %
+F_q = -73.0105+/-0.0581  F_q-F_exact = 4.88213
+F_NIS = -77.745+/-0.1647 F_NIS-F_exact = 0.1476
+Chi NIS: 1.613566e-02 +/- 3.867061e-03
+Chi teorico: 1.425800e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.0001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_2.6.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 4.833984375 %
+F_q = -73.8383+/-0.0576  F_q-F_exact = 5.29328
+F_NIS = -79.059+/-0.1525 F_NIS-F_exact = 0.0726
+Chi NIS: 9.280803e-03 +/- 1.430383e-03
+Chi teorico: 1.349728e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.0001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_2.7.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 5.2001953125 %
+F_q = -74.3944+/-0.0664  F_q-F_exact = 5.99293
+F_NIS = -80.069+/-0.1458 F_NIS-F_exact = 0.3179
+Chi NIS: 1.317044e-02 +/- 1.962917e-03
+Chi teorico: 1.280374e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.0001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_2.8.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 4.19921875 %
+F_q = -75.1451+/-0.0656  F_q-F_exact = 6.51353
+F_NIS = -81.394+/-0.1536 F_NIS-F_exact = 0.2647
+Chi NIS: 9.420628e-03 +/- 2.007778e-03
+Chi teorico: 1.217051e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 0.0001
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_2.9.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 2.5146484375 %
+F_q = -75.8453+/-0.0781  F_q-F_exact = 7.09902
+F_NIS = -82.640+/-0.2290 F_NIS-F_exact = 0.3041
+Chi NIS: 9.344151e-03 +/- 2.989690e-03
+Chi teorico: 1.159138e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 7.5e-05
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_3.0.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 0.7080078125 %
+F_q = -76.7736+/-0.0743  F_q-F_exact = 7.46973
+F_NIS = -84.688+/-0.3603 F_NIS-F_exact = -0.4446
+Chi NIS: 2.866377e-03 +/- 1.158077e-03
+Chi teorico: 1.106080e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 7.5e-05
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_3.1.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 2.4658203125 %
+F_q = -77.2276+/-0.0749  F_q-F_exact = 8.32705
+F_NIS = -85.348+/-0.2460 F_NIS-F_exact = 0.2063
+Chi NIS: 6.257175e-03 +/- 1.552704e-03
+Chi teorico: 1.057378e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 7.5e-05
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_3.2.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 1.806640625 %
+F_q = -78.0503+/-0.0829  F_q-F_exact = 8.82706
+F_NIS = -87.379+/-0.8385 F_NIS-F_exact = -0.5021
+Chi NIS: 3.473914e-03 +/- 3.160963e-03
+Chi teorico: 1.012586e-02
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 7.5e-05
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_3.3.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 1.07421875 %
+F_q = -78.8017+/-0.0844  F_q-F_exact = 9.40904
+F_NIS = -87.988+/-0.3979 F_NIS-F_exact = 0.2224
+Chi NIS: 6.066338e-03 +/- 3.089448e-03
+Chi teorico: 9.713084e-03
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 7.5e-05
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_3.4.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 0.7568359375 %
+F_q = -79.3504+/-0.0836  F_q-F_exact = 10.20352
+F_NIS = -88.795+/-0.3379 F_NIS-F_exact = 0.7592
+Chi NIS: 1.015015e-02 +/- 4.588919e-03
+Chi teorico: 9.331908e-03
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 7.5e-05
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_3.5.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 0.3173828125 %
+F_q = -80.0709+/-0.1026  F_q-F_exact = 10.83530
+F_NIS = -90.554+/-0.4610 F_NIS-F_exact = 0.3527
+Chi NIS: 4.617667e-03 +/- 2.438589e-03
+Chi teorico: 8.979181e-03
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 7.5e-05
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_3.6.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 0.634765625 %
+F_q = -80.7302+/-0.0885  F_q-F_exact = 11.53687
+F_NIS = -92.234+/-0.5983 F_NIS-F_exact = 0.0328
+Chi NIS: 2.070205e-03 +/- 1.464561e-03
+Chi teorico: 8.652097e-03
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 7.5e-05
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_3.7.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 0.1220703125 %
+F_q = -81.3885+/-0.1063  F_q-F_exact = 12.24733
+F_NIS = -94.175+/-0.7594 F_NIS-F_exact = -0.5392
+Chi NIS: 1.169367e-03 +/- 1.141279e-03
+Chi teorico: 8.348160e-03
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 7.5e-05
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_3.8.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 1.5625 %
+F_q = -82.0163+/-0.0996  F_q-F_exact = 12.99575
+F_NIS = -94.462+/-0.4819 F_NIS-F_exact = 0.5498
+Chi NIS: 3.073787e-03 +/- 2.396131e-03
+Chi teorico: 8.065149e-03
+Optimizer state loaded.
+Learning Rate resettato manualmente a: 7.5e-05
+Performing forawrd training
+Checkpoint saved to out_u1/L4_8x8_16/checkpoint_3.9.pt
+Latest checkpoint saved to out_u1/L4_8x8_16/checkpoint.pt
+File size: 0.63 MB
+Accept rate is: 0.87890625 %
+F_q = -83.0798+/-0.1010  F_q-F_exact = 13.31532
+F_NIS = -96.095+/-0.2699 F_NIS-F_exact = 0.3001
+Chi NIS: 1.943382e-03 +/- 9.436762e-04
+Chi teorico: 7.801087e-03
+Traceback (most recent call last):
+  File "C:\Users\franc\OneDrive\Desktop\Github Projects\NormFlows_LGT\scripts\u1_forward.py", line 1, in <module>
+    import torch
+  File "C:\Users\franc\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\__init__.py", line 281, in <module>
+    _load_dll_libraries()
+  File "C:\Users\franc\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\__init__.py", line 257, in _load_dll_libraries
+    res = kernel32.LoadLibraryExW(dll, None, 0x00001100)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
