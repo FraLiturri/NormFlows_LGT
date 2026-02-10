@@ -41,3 +41,13 @@ dkl -62.5522
 std_dkl 0.253863
 loss -7.05779
 ess 0.938798
+ > Era   4 epoch    0 ellapsed time 148.9
+dkl -62.5528
+std_dkl 0.2519
+loss -7.13398
+ess 0.939433
+ > Era   4 epoch   10 ellapsed time 169.6
+dkl -62.5545
+std_dkl 0.248926
+loss -7.09719
+ess 0.941077
